@@ -3,28 +3,141 @@ import StationLayout from '../components/StationLayout';
 import { alarms } from '../mockData';
 import { Alarm } from '../types';
 
+type LevelFilter = 'all' | 'critical' | 'warning';
+type StatusFilter = 'all' | 'pending' | 'processing' | 'resolved';
+type TimeFilter = '24h' | '7d' | '30d' | 'all';
+
 const StationAlarms: React.FC = () => {
   const [selectedAlarm, setSelectedAlarm] = useState<Alarm | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [levelFilter, setLevelFilter] = useState<LevelFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('24h');
+  const [showLevelDropdown, setShowLevelDropdown] = useState(false);
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
+
+  const levelOptions = [
+    { value: 'all', label: '全部' },
+    { value: 'critical', label: '严重' },
+    { value: 'warning', label: '警告' },
+  ];
+
+  const statusOptions = [
+    { value: 'all', label: '全部' },
+    { value: 'pending', label: '未处理' },
+    { value: 'processing', label: '处理中' },
+    { value: 'resolved', label: '已关闭' },
+  ];
+
+  const timeOptions = [
+    { value: '24h', label: '24小时' },
+    { value: '7d', label: '7天' },
+    { value: '30d', label: '30天' },
+    { value: 'all', label: '全部' },
+  ];
+
+  // Filter alarms
+  const filteredAlarms = alarms.filter(alarm => {
+    if (levelFilter !== 'all' && alarm.level !== levelFilter) return false;
+    if (statusFilter !== 'all' && alarm.status !== statusFilter) return false;
+    return true;
+  });
+
+  const closeAllDropdowns = () => {
+    setShowLevelDropdown(false);
+    setShowStatusDropdown(false);
+    setShowTimeDropdown(false);
+  };
 
   return (
     <StationLayout title="站点告警">
-      <div className="relative h-full flex flex-col">
+      <div className="relative h-full flex flex-col" onClick={closeAllDropdowns}>
         {/* Filters */}
-        <div className="px-4 pb-3 pt-4 flex gap-2 overflow-x-auto no-scrollbar items-center bg-background-light/95 dark:bg-background-dark/95 z-30 backdrop-blur-sm shrink-0">
-          <button className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 whitespace-nowrap active:bg-slate-200 dark:active:bg-slate-700 transition-colors">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">等级: 全部</span>
-            <span className="material-symbols-outlined text-[18px] text-slate-500">expand_more</span>
-          </button>
-          <button className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 whitespace-nowrap">
-            <span className="text-sm font-medium text-primary">状态: 未处理</span>
-            <span className="material-symbols-outlined text-[18px] text-primary">expand_more</span>
-          </button>
-          <button className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 whitespace-nowrap active:bg-slate-200 dark:active:bg-slate-700 transition-colors">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">时间: 24h</span>
-            <span className="material-symbols-outlined text-[18px] text-slate-500">expand_more</span>
-          </button>
-          <button className="flex items-center justify-center size-8 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shrink-0">
+        <div className="px-4 pb-3 pt-4 flex gap-2 items-center bg-background-light/95 dark:bg-background-dark/95 z-30 backdrop-blur-sm shrink-0">
+          {/* Level Filter */}
+          <div className="relative shrink-0">
+            <button
+              onClick={(e) => { e.stopPropagation(); closeAllDropdowns(); setShowLevelDropdown(!showLevelDropdown); }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border whitespace-nowrap transition-colors ${levelFilter !== 'all'
+                ? 'bg-primary/10 border-primary/20 text-primary'
+                : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                }`}
+            >
+              <span className="text-sm font-medium">等级: {levelOptions.find(o => o.value === levelFilter)?.label}</span>
+              <span className="material-symbols-outlined text-[18px]">expand_more</span>
+            </button>
+            {showLevelDropdown && (
+              <div className="absolute top-full left-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-50 min-w-[120px]" onClick={e => e.stopPropagation()}>
+                {levelOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => { setLevelFilter(opt.value as LevelFilter); setShowLevelDropdown(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 ${levelFilter === opt.value ? 'text-primary font-medium' : 'text-slate-700 dark:text-slate-300'}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Status Filter */}
+          <div className="relative shrink-0">
+            <button
+              onClick={(e) => { e.stopPropagation(); closeAllDropdowns(); setShowStatusDropdown(!showStatusDropdown); }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border whitespace-nowrap transition-colors ${statusFilter !== 'all'
+                ? 'bg-primary/10 border-primary/20 text-primary'
+                : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                }`}
+            >
+              <span className="text-sm font-medium">状态: {statusOptions.find(o => o.value === statusFilter)?.label}</span>
+              <span className="material-symbols-outlined text-[18px]">expand_more</span>
+            </button>
+            {showStatusDropdown && (
+              <div className="absolute top-full left-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-50 min-w-[120px]" onClick={e => e.stopPropagation()}>
+                {statusOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => { setStatusFilter(opt.value as StatusFilter); setShowStatusDropdown(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 ${statusFilter === opt.value ? 'text-primary font-medium' : 'text-slate-700 dark:text-slate-300'}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Time Filter */}
+          <div className="relative shrink-0">
+            <button
+              onClick={(e) => { e.stopPropagation(); closeAllDropdowns(); setShowTimeDropdown(!showTimeDropdown); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 whitespace-nowrap text-slate-700 dark:text-slate-300 transition-colors"
+            >
+              <span className="text-sm font-medium">时间: {timeOptions.find(o => o.value === timeFilter)?.label}</span>
+              <span className="material-symbols-outlined text-[18px]">expand_more</span>
+            </button>
+            {showTimeDropdown && (
+              <div className="absolute top-full right-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-50 min-w-[100px]" onClick={e => e.stopPropagation()}>
+                {timeOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => { setTimeFilter(opt.value as TimeFilter); setShowTimeDropdown(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 ${timeFilter === opt.value ? 'text-primary font-medium' : 'text-slate-700 dark:text-slate-300'}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Clear Filters */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setLevelFilter('all'); setStatusFilter('all'); setTimeFilter('24h'); }}
+            className="flex items-center justify-center size-8 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shrink-0"
+          >
             <span className="material-symbols-outlined text-[20px]">filter_list_off</span>
           </button>
         </div>
@@ -49,48 +162,55 @@ const StationAlarms: React.FC = () => {
 
           {/* Alarm List */}
           <div className="flex flex-col gap-3 pb-20">
-            {alarms.map((alarm) => (
-              <button
-                key={alarm.id}
-                onClick={() => setSelectedAlarm(alarm)}
-                className={`w-full text-left relative bg-surface-light dark:bg-surface-dark rounded-xl shadow-card overflow-hidden group active:scale-[0.98] transition-all duration-150 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 ${alarm.status === 'resolved' ? 'opacity-80' : ''}`}
-              >
-                <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${alarm.level === 'critical' ? 'bg-red-500' :
+            {filteredAlarms.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                <span className="material-symbols-outlined text-5xl mb-2">inbox</span>
+                <p className="text-sm">暂无符合条件的告警</p>
+              </div>
+            ) : (
+              filteredAlarms.map((alarm) => (
+                <button
+                  key={alarm.id}
+                  onClick={() => setSelectedAlarm(alarm)}
+                  className={`w-full text-left relative bg-surface-light dark:bg-surface-dark rounded-xl shadow-card overflow-hidden group active:scale-[0.98] transition-all duration-150 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 ${alarm.status === 'resolved' ? 'opacity-80' : ''}`}
+                >
+                  <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${alarm.level === 'critical' ? 'bg-red-500' :
                     alarm.level === 'warning' ? 'bg-amber-500' :
                       alarm.status === 'resolved' ? 'bg-emerald-500' : 'bg-slate-400'
-                  }`}></div>
-                <div className="p-4 pl-5 flex items-start gap-3">
-                  <div className={`shrink-0 size-10 rounded-lg flex items-center justify-center mt-1 ${alarm.level === 'critical' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' :
+                    }`}></div>
+                  <div className="p-4 pl-5 flex items-start gap-3">
+                    <div className={`shrink-0 size-10 rounded-lg flex items-center justify-center mt-1 ${alarm.level === 'critical' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' :
                       alarm.level === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400' :
                         alarm.status === 'resolved' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' :
                           'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                    }`}>
-                    <span className="material-symbols-outlined">
-                      {alarm.level === 'critical' ? 'warning' : alarm.level === 'warning' ? 'thermostat' : alarm.status === 'resolved' ? 'check_circle' : 'wifi_off'}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-1">
-                      <h3 className="text-slate-900 dark:text-white font-bold truncate pr-2">{alarm.device}</h3>
-                      <span className="text-xs font-mono text-slate-400 whitespace-nowrap">{alarm.time}</span>
-                    </div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-tight mb-2">{alarm.message}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 uppercase tracking-wide">
-                        {alarm.code}
+                      }`}>
+                      <span className="material-symbols-outlined">
+                        {alarm.level === 'critical' ? 'warning' : alarm.level === 'warning' ? 'thermostat' : alarm.status === 'resolved' ? 'check_circle' : 'wifi_off'}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${alarm.status === 'pending' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' :
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1">
+                        <h3 className="text-slate-900 dark:text-white font-bold truncate pr-2">{alarm.device}</h3>
+                        <span className="text-xs font-mono text-slate-400 whitespace-nowrap">{alarm.time}</span>
+                      </div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-tight mb-2">{alarm.message}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 uppercase tracking-wide">
+                          {alarm.code}
+                        </span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${alarm.status === 'pending' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' :
                           alarm.status === 'processing' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' :
                             alarm.status === 'resolved' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' :
                               'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                        }`}>
-                        {alarm.status === 'pending' ? '未处理' : alarm.status === 'processing' ? '处理中' : alarm.status === 'resolved' ? '已关闭' : '待复核'}
-                      </span>
+                          }`}>
+                          {alarm.status === 'pending' ? '未处理' : alarm.status === 'processing' ? '处理中' : alarm.status === 'resolved' ? '已关闭' : '待复核'}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              ))
+            )}
           </div>
         </div>
 
