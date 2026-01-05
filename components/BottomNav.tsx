@@ -9,9 +9,9 @@ const BottomNav: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-[#101922] border-t border-slate-200 dark:border-slate-800 pb-safe pt-2 z-50">
+    <nav className="shrink-0 bg-white dark:bg-[#101922] border-t border-slate-200 dark:border-slate-800 pt-2 z-50">
       <div className="flex justify-around items-center h-16 pb-2">
-        <button 
+        <button
           onClick={() => navigate('/')}
           className="flex flex-col items-center justify-center w-full h-full gap-1 group"
         >
@@ -24,7 +24,7 @@ const BottomNav: React.FC = () => {
             首页
           </span>
         </button>
-        <button 
+        <button
           onClick={() => navigate('/me')}
           className="flex flex-col items-center justify-center w-full h-full gap-1 group"
         >

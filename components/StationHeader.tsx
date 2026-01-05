@@ -20,7 +20,7 @@ const StationHeader: React.FC<StationHeaderProps> = ({ title }) => {
     <>
       <header className="sticky top-0 z-40 bg-surface-light dark:bg-surface-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
         <div className="flex items-center justify-between px-4 h-16">
-          <button 
+          <button
             onClick={() => navigate('/')}
             className="flex items-center justify-center size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300"
           >
@@ -41,7 +41,7 @@ const StationHeader: React.FC<StationHeaderProps> = ({ title }) => {
       </header>
 
       {/* Bottom Tab Bar (replaces the main app bottom bar for this view) */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-surface-light dark:bg-surface-dark border-t border-slate-200 dark:border-slate-700 pb-safe z-40 transition-colors duration-200">
+      <nav className="shrink-0 bg-surface-light dark:bg-surface-dark border-t border-slate-200 dark:border-slate-700 z-40 transition-colors duration-200">
         <div className="flex justify-around items-center h-16 pb-2">
           {tabs.map((tab) => {
             const isActive = location.pathname === tab.path;
@@ -49,9 +49,8 @@ const StationHeader: React.FC<StationHeaderProps> = ({ title }) => {
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className={`relative flex flex-col items-center justify-center w-full h-full gap-1 ${
-                  isActive ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-                }`}
+                className={`relative flex flex-col items-center justify-center w-full h-full gap-1 ${isActive ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                  }`}
               >
                 {isActive && (
                   <span className="absolute top-0 w-12 h-0.5 bg-primary rounded-b-full"></span>

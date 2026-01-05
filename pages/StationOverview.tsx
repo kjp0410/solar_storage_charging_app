@@ -1,14 +1,12 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import StationHeader from '../components/StationHeader';
+import StationLayout from '../components/StationLayout';
 import { powerLoadData } from '../mockData';
 
 const StationOverview: React.FC = () => {
   return (
-    <div className="bg-background-light dark:bg-background-dark min-h-screen text-slate-900 dark:text-white pb-32">
-      <StationHeader title="站点概览" />
-      
-      <main className="relative z-10 flex flex-col gap-6 p-4">
+    <StationLayout title="站点概览">
+      <div className="flex flex-col gap-6 p-4">
         {/* Title Section */}
         <section className="flex flex-col gap-3">
           <div className="flex items-start justify-between">
@@ -84,8 +82,8 @@ const StationOverview: React.FC = () => {
         {/* Device Status */}
         <section>
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 px-1">设备状态</h3>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
-            <div className="min-w-[140px] flex-1 flex flex-col p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-slate-800 shadow-card">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}>
+            <div className="w-[160px] shrink-0 flex flex-col p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-slate-800 shadow-card">
               <div className="flex items-center justify-between mb-2">
                 <span className="material-symbols-outlined text-slate-400">solar_power</span>
                 <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
@@ -96,9 +94,9 @@ const StationOverview: React.FC = () => {
                 <span className="text-xs text-slate-400">/ 12</span>
               </div>
             </div>
-            <div className="min-w-[140px] flex-1 flex flex-col p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-slate-800 shadow-card">
+            <div className="w-[160px] shrink-0 flex flex-col p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-slate-800 shadow-card">
               <div className="flex items-center justify-between mb-2">
-                <span className="material-symbols-outlined text-slate-400">grid_4x4</span>
+                <span className="material-symbols-outlined text-slate-400">battery_horiz_075</span>
                 <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">储能</p>
@@ -107,7 +105,7 @@ const StationOverview: React.FC = () => {
                 <span className="text-xs text-slate-400">/ 2</span>
               </div>
             </div>
-            <div className="min-w-[140px] flex-1 flex flex-col p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-slate-800 shadow-card">
+            <div className="w-[160px] shrink-0 flex flex-col p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-slate-800 shadow-card">
               <div className="flex items-center justify-between mb-2">
                 <span className="material-symbols-outlined text-slate-400">ev_station</span>
                 <span className="flex h-2 w-2 rounded-full bg-amber-500"></span>
@@ -141,40 +139,40 @@ const StationOverview: React.FC = () => {
               <AreaChart data={powerLoadData}>
                 <defs>
                   <linearGradient id="colorGeneration" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0f7ae6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#0f7ae6" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#0f7ae6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#0f7ae6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
-                <XAxis 
-                    dataKey="time" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{fontSize: 10, fill: '#94a3b8'}}
-                    dy={10}
+                <XAxis
+                  dataKey="time"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  dy={10}
                 />
                 <Tooltip />
-                <Area 
-                    type="monotone" 
-                    dataKey="generation" 
-                    stroke="#0f7ae6" 
-                    fillOpacity={1} 
-                    fill="url(#colorGeneration)" 
-                    strokeWidth={2}
+                <Area
+                  type="monotone"
+                  dataKey="generation"
+                  stroke="#0f7ae6"
+                  fillOpacity={1}
+                  fill="url(#colorGeneration)"
+                  strokeWidth={2}
                 />
-                <Area 
-                    type="monotone" 
-                    dataKey="load" 
-                    stroke="#cbd5e1" 
-                    fill="transparent" 
-                    strokeWidth={2}
+                <Area
+                  type="monotone"
+                  dataKey="load"
+                  stroke="#cbd5e1"
+                  fill="transparent"
+                  strokeWidth={2}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </section>
-      </main>
-    </div>
+      </div>
+    </StationLayout>
   );
 };
 
