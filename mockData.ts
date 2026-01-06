@@ -267,3 +267,82 @@ export const stationOverviewData = {
     { from: "ess", to: "ems", power_kw: 20.0, active: true }
   ]
 };
+
+// 设备深度分析数据 (Device Deep Dive Diagnostic)
+export const deviceAnalysisData = {
+  header: {
+    comms: { type: '4G', signalStrength: -80 }, // dBm
+    systemState: 'Grid-Connected', // Grid-Connected, Islanding, Fault
+    activeAlarms: 0
+  },
+  battery: {
+    // 电芯一致性
+    cellConsistency: {
+      minVoltage: 3.21,
+      maxVoltage: 3.26,
+      delta: 0.05,
+      threshold: 0.1 // 告警阈值
+    },
+    // 温度热力图 (8行 x 12列 = 96个电芯)
+    thermalMatrix: (() => {
+      const cells = [];
+      for (let row = 1; row <= 8; row++) {
+        for (let col = 1; col <= 12; col++) {
+          // 基础温度 25-35°C，随机波动
+          let baseTemp = 25 + Math.random() * 10;
+          // 模拟几个热点
+          if ((row === 3 && col === 7) || (row === 6 && col === 4)) {
+            baseTemp = 42 + Math.random() * 8; // 热点 40-50°C
+          }
+          if (row === 5 && col === 10) {
+            baseTemp = 48 + Math.random() * 5; // 超限热点
+          }
+          cells.push({
+            id: `${row}-${col}`,
+            row,
+            col,
+            temp: Math.round(baseTemp * 10) / 10,
+            voltage: 3.2 + Math.random() * 0.1
+          });
+        }
+      }
+      return cells;
+    })(),
+    // 温度统计
+    tempStats: {
+      min: 24.5,
+      max: 51.2,
+      avg: 29.8,
+      hotspots: 3
+    }
+  },
+  inverter: {
+    dc: {
+      voltage: 750.5, // V
+      current: 120.2, // A
+      power: 90.2     // kW
+    },
+    ac: {
+      voltage: 380.1, // V
+      frequency: 50.02, // Hz
+      powerFactor: 0.99
+    },
+    igbtTemp: 68.5 // °C
+  },
+  charger: {
+    guns: [
+      { id: '01', state: 'Charging', power: 62.5, soc: 45, current: 150, voltage: 400, orderId: 'ORD20260106001' },
+      { id: '02', state: 'Idle', power: 0, soc: 0, current: 0, voltage: 0, orderId: '' },
+      { id: '03', state: 'Charging', power: 58.2, soc: 72, current: 145, voltage: 401, orderId: 'ORD20260106002' },
+      { id: '04', state: 'Charging', power: 45.0, soc: 28, current: 112, voltage: 400, orderId: 'ORD20260106003' },
+      { id: '05', state: 'Fault', power: 0, soc: 0, current: 0, voltage: 0, orderId: '' },
+      { id: '06', state: 'Idle', power: 0, soc: 0, current: 0, voltage: 0, orderId: '' },
+      { id: '07', state: 'Charging', power: 120.0, soc: 55, current: 300, voltage: 400, orderId: 'ORD20260106004' },
+      { id: '08', state: 'Offline', power: 0, soc: 0, current: 0, voltage: 0, orderId: '' },
+      { id: '09', state: 'Idle', power: 0, soc: 0, current: 0, voltage: 0, orderId: '' },
+      { id: '10', state: 'Charging', power: 80.5, soc: 88, current: 200, voltage: 402, orderId: 'ORD20260106005' },
+      { id: '11', state: 'Fault', power: 0, soc: 0, current: 0, voltage: 0, orderId: '' },
+      { id: '12', state: 'Idle', power: 0, soc: 0, current: 0, voltage: 0, orderId: '' }
+    ]
+  }
+};

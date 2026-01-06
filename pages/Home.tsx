@@ -1,249 +1,300 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { stations } from '../mockData';
 import BottomNav from '../components/BottomNav';
+import WeatherWidget from '../components/WeatherWidget';
+import NotificationBell from '../components/NotificationBell';
+import StatusFilterChips, { FilterStatus } from '../components/StatusFilterChips';
+import LocationPicker, { SelectedLocation } from '../components/LocationPicker';
+import AMapView from '../components/AMapView';
 
 const Home: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
-  const [mapScale, setMapScale] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
   const navigate = useNavigate();
 
-  const selectedStation = stations.find(s => s.id === selectedStationId);
+  // 过滤站点逻辑
+  const filteredStations = useMemo(() => {
+    return stations.filter((station) => {
+      if (statusFilter !== 'all' && station.status !== statusFilter) {
+        return false;
+      }
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        if (
+          !station.name.toLowerCase().includes(query) &&
+          !station.id.toLowerCase().includes(query)
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [statusFilter, searchQuery, selectedLocation]);
 
-  const handleZoomIn = () => {
-    setMapScale(prev => Math.min(prev + 0.25, 2));
-  };
-
-  const handleZoomOut = () => {
-    setMapScale(prev => Math.max(prev - 0.25, 0.5));
+  const handleRemoveLocation = () => {
+    setSelectedLocation(null);
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <main className="flex-1 flex flex-col overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-950 -z-10 pointer-events-none"></div>
+    <div className="relative h-full overflow-hidden flex flex-col bg-background-light dark:bg-background-dark">
+      {/* 背景装饰 Blobs */}
+      <div className="blob bg-blue-400 dark:bg-blue-900 w-80 h-80 rounded-full -top-20 -left-20"></div>
+      <div className="blob bg-purple-400 dark:bg-purple-900 w-80 h-80 rounded-full top-40 -right-20 animation-delay-2000"></div>
+      <div className="blob bg-teal-300 dark:bg-teal-900 w-60 h-60 rounded-full bottom-40 left-10 animation-delay-4000"></div>
 
-        {/* Sticky Header */}
-        <div className="px-4 pt-6 pb-2 bg-white/80 dark:bg-[#101922]/90 backdrop-blur-md sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 shrink-0">
-          <div className="mb-4">
-            <label className="flex flex-col h-12 w-full">
-              <div className="flex w-full flex-1 items-stretch rounded-lg h-full shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 bg-slate-50 dark:bg-slate-800">
-                <div className="text-slate-500 flex border-none items-center justify-center pl-4 rounded-l-lg">
-                  <span className="material-symbols-outlined">search</span>
-                </div>
-                <input
-                  className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-slate-900 dark:text-white focus:outline-none focus:ring-0 border-none bg-transparent h-full placeholder:text-slate-400 px-4 pl-2 text-base font-normal leading-normal"
-                  placeholder="搜索电站名称或ID..."
-                />
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto no-scrollbar pb-28 px-5 pt-6 relative z-10">
+
+        {/* Header: Weather + Notifications */}
+        <header className="flex justify-between items-center mb-2 px-1">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center text-orange-500">
+              <span className="material-symbols-outlined text-[18px]">wb_sunny</span>
+            </div>
+            <div>
+              <div className="text-[9px] text-slate-400 dark:text-slate-500 font-medium tracking-wide">上海</div>
+              <div className="text-sm font-bold flex items-center gap-1 text-slate-800 dark:text-white leading-none">
+                28° <span className="text-[9px] font-normal text-slate-400">晴</span>
               </div>
-            </label>
+            </div>
           </div>
-          <div className="flex">
-            <div className="flex h-10 flex-1 items-center justify-center rounded-lg bg-slate-200 dark:bg-slate-800 p-1">
+          <NotificationBell />
+        </header>
+
+        {/* Search + Filter Button */}
+        <div className="flex gap-2 mb-3">
+          <div className="flex-1 relative group">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-[18px]">
+              search
+            </span>
+            <input
+              className="w-full bg-glass-light dark:bg-glass-dark backdrop-blur-xl border border-glass-border-light dark:border-glass-border-dark rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none shadow-sm placeholder-slate-400 dark:placeholder-slate-500 dark:text-white transition-all"
+              placeholder="查找电站、ID 或位置..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <button
+            onClick={() => setShowLocationPicker(true)}
+            className="bg-glass-light dark:bg-glass-dark backdrop-blur-xl border border-glass-border-light dark:border-glass-border-dark rounded-xl w-12 flex items-center justify-center shadow-sm active:scale-95 transition-transform hover:bg-white dark:hover:bg-slate-800"
+          >
+            <span className="material-symbols-outlined text-slate-600 dark:text-slate-200 text-[20px]">tune</span>
+          </button>
+        </div>
+
+        {/* Selected Location Tags */}
+        {selectedLocation?.province && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 backdrop-blur-sm text-primary text-xs font-medium rounded-full border border-primary/20">
+              <span>
+                {selectedLocation.province.name}
+                {selectedLocation.city && ` / ${selectedLocation.city.name}`}
+                {selectedLocation.district && ` / ${selectedLocation.district.name}`}
+              </span>
               <button
-                onClick={() => setViewMode('list')}
-                className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 transition-all duration-200 ${viewMode === 'list'
-                    ? 'bg-primary shadow-md text-white'
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50'
-                  }`}
+                onClick={handleRemoveLocation}
+                className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-primary/20 transition-colors"
               >
-                <span className="truncate text-sm font-medium leading-normal">列表模式</span>
-              </button>
-              <button
-                onClick={() => { setViewMode('map'); setSelectedStationId(null); }}
-                className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 transition-all duration-200 ${viewMode === 'map'
-                    ? 'bg-primary shadow-md text-white'
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50'
-                  }`}
-              >
-                <span className="truncate text-sm font-medium leading-normal">地图模式</span>
+                <span className="material-symbols-outlined text-[12px]">close</span>
               </button>
             </div>
           </div>
+        )}
+
+        {/* Status Filter Chips - Material 3 Unified Choice Chip Style */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar mb-3 pb-1">
+          {/* All */}
+          <button
+            onClick={() => setStatusFilter('all')}
+            className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-medium flex items-center gap-1 transition-all active:scale-95 ${statusFilter === 'all'
+              ? 'bg-[#2563EB] text-white'
+              : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]'
+              }`}
+          >
+            <span className="material-symbols-outlined text-[14px]">check_circle</span>
+            全部
+          </button>
+
+          {/* Running / Online */}
+          <button
+            onClick={() => setStatusFilter('online')}
+            className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-medium flex items-center gap-1 transition-all active:scale-95 ${statusFilter === 'online'
+              ? 'bg-[#DCFCE7] text-[#166534] border border-[#22C55E]'
+              : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]'
+              }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${statusFilter === 'online' ? 'bg-[#166534]' : 'bg-[#22C55E]'}`}></span>
+            运行中
+          </button>
+
+          {/* Error / Alarm */}
+          <button
+            onClick={() => setStatusFilter('alarm')}
+            className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-medium flex items-center gap-1 transition-all active:scale-95 ${statusFilter === 'alarm'
+              ? 'bg-[#FEE2E2] text-[#991B1B] border border-[#EF4444]'
+              : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]'
+              }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${statusFilter === 'alarm' ? 'bg-[#991B1B]' : 'bg-[#EF4444]'}`}></span>
+            异常
+          </button>
+
+          {/* Offline */}
+          <button
+            onClick={() => setStatusFilter('offline')}
+            className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-medium flex items-center gap-1 transition-all active:scale-95 ${statusFilter === 'offline'
+              ? 'bg-[#E5E7EB] text-[#374151] border border-[#9CA3AF]'
+              : 'bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]'
+              }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${statusFilter === 'offline' ? 'bg-[#374151]' : 'bg-[#9CA3AF]'}`}></span>
+            离线
+          </button>
+        </div>
+
+        {/* View Mode Toggle */}
+        <div className="bg-glass-light dark:bg-glass-dark backdrop-blur-xl p-1 rounded-xl flex mb-4 shadow-inner border border-glass-border-light dark:border-glass-border-dark">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`flex-1 py-1.5 text-sm font-semibold flex items-center justify-center gap-2 rounded-lg transition-all ${viewMode === 'list'
+              ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">list</span>
+            列表视图
+          </button>
+          <button
+            onClick={() => setViewMode('map')}
+            className={`flex-1 py-1.5 text-sm font-medium flex items-center justify-center gap-2 rounded-lg transition-all ${viewMode === 'map'
+              ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">map</span>
+            地图模式
+          </button>
         </div>
 
         {/* Content Area */}
         {viewMode === 'list' ? (
-          <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
-            {stations.map((station) => (
-              <div
-                key={station.id}
-                onClick={() => navigate(`/station/${station.id}/overview`)}
-                className="flex flex-col rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden group active:scale-[0.99] transition-transform duration-100 cursor-pointer"
-              >
-                <div
-                  className="h-32 w-full bg-cover bg-center relative"
-                  style={{ backgroundImage: `url('${station.image}')` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute bottom-3 left-3 text-white">
-                    <p className="text-xs font-medium bg-black/30 backdrop-blur-sm px-2 py-1 rounded inline-block mb-1">
-                      编号: #SOL-00{station.id}
-                    </p>
-                  </div>
-                </div>
-                <div className="p-4 flex flex-col">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="text-slate-900 dark:text-white text-lg font-bold leading-tight">{station.name}</h3>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[16px]">location_on</span>
-                        {station.address}
-                      </p>
-                    </div>
-                    <div className={`flex h-8 px-3 items-center justify-center rounded-full gap-1.5 text-xs font-semibold uppercase tracking-wide ${station.status === 'online' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' :
-                        station.status === 'alarm' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
-                          'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300'
-                      }`}>
-                      <span className="material-symbols-outlined text-[18px]">
-                        {station.status === 'online' ? 'check_circle' : station.status === 'alarm' ? 'warning' : 'cloud_off'}
-                      </span>
-                      <span>
-                        {station.status === 'online' ? '在线' : station.status === 'alarm' ? '告警' : '离线'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 tracking-wider">光伏功率</span>
-                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{station.pvPower}</span>
-                    </div>
-                    <div className="flex flex-col gap-0.5 border-l border-slate-100 dark:border-slate-700 pl-3">
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 tracking-wider">储能容量</span>
-                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{station.storage}</span>
-                    </div>
-                    <div className="flex flex-col gap-0.5 border-l border-slate-100 dark:border-slate-700 pl-3">
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 tracking-wider">充电桩</span>
-                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{station.chargers}</span>
-                    </div>
-                  </div>
-                </div>
+          <>
+            {/* 站点统计 */}
+            <div className="flex justify-between items-end mb-4 px-1">
+              <h2 className="text-base font-semibold text-slate-800 dark:text-white">监控列表</h2>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-black/30 px-2.5 py-1 rounded-lg">
+                共 {filteredStations.length} 个站点
+              </span>
+            </div>
+
+            {filteredStations.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                <span className="material-symbols-outlined text-[56px] mb-4 opacity-50">search_off</span>
+                <p className="text-sm">未找到匹配的站点</p>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex-1 relative w-full h-full overflow-hidden bg-slate-100 dark:bg-[#0B1116]">
-            {/* Map Container with zoom */}
-            <div
-              className="absolute inset-0 transition-transform duration-300 origin-center"
-              style={{ transform: `scale(${mapScale})` }}
-              onClick={() => setSelectedStationId(null)}
-            >
-              {/* Map Grid Background */}
-              <div className="absolute inset-0 opacity-40 pointer-events-none" style={{
-                backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)',
-                backgroundSize: '20px 20px',
-                color: '#64748b'
-              }}></div>
+            ) : (
+              <div className="space-y-5">
+                {filteredStations.map((station) => (
+                  <div
+                    key={station.id}
+                    onClick={() => navigate(`/station/${station.id}/overview`)}
+                    className="group bg-glass-light dark:bg-glass-dark backdrop-blur-xl border border-glass-border-light dark:border-glass-border-dark rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+                  >
+                    {/* 图片区域 */}
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={station.image}
+                        alt={station.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
 
-              {/* Map Roads */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20 dark:opacity-10" xmlns="http://www.w3.org/2000/svg">
-                <path d="M-100 200 L400 200 L600 400" fill="none" stroke="#64748b" strokeWidth="20"></path>
-                <path d="M200 -100 L200 800" fill="none" stroke="#64748b" strokeWidth="15"></path>
-                <path d="M0 500 L800 300" fill="none" stroke="#64748b" strokeWidth="12"></path>
-              </svg>
-
-              {/* Map Markers */}
-              {stations.map((station) => (
-                <div
-                  key={station.id}
-                  className="absolute flex flex-col items-center cursor-pointer transition-transform hover:scale-110 z-10"
-                  style={{ top: `${station.coordinates.y}%`, left: `${station.coordinates.x}%`, transform: 'translate(-50%, -50%)' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedStationId(station.id === selectedStationId ? null : station.id);
-                  }}
-                >
-                  {/* Marker Icon */}
-                  <div className={`p-2 rounded-full shadow-lg border-2 border-white dark:border-slate-700 ${station.status === 'online' ? 'bg-emerald-500' :
-                      station.status === 'alarm' ? 'bg-amber-500 animate-pulse' :
-                        'bg-slate-500'
-                    } text-white`}>
-                    <span className="material-symbols-outlined text-[20px] block">
-                      {station.status === 'online' ? 'bolt' : station.status === 'alarm' ? 'warning' : 'cloud_off'}
-                    </span>
-                  </div>
-                  {/* Station Name Label */}
-                  <div className="mt-1 px-2 py-0.5 bg-white dark:bg-slate-800 rounded shadow-sm text-xs font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap">
-                    {station.name.length > 10 ? station.name.substring(0, 10) + '...' : station.name}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Zoom Controls */}
-            <div className="absolute top-4 right-4 flex flex-col gap-2 z-30">
-              <button
-                onClick={handleZoomIn}
-                className="w-10 h-10 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 active:scale-95 transition-transform"
-              >
-                <span className="material-symbols-outlined">add</span>
-              </button>
-              <button
-                onClick={handleZoomOut}
-                className="w-10 h-10 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 active:scale-95 transition-transform"
-              >
-                <span className="material-symbols-outlined">remove</span>
-              </button>
-            </div>
-
-            {/* Zoom Level Indicator */}
-            <div className="absolute top-4 left-4 bg-white dark:bg-slate-800 px-2 py-1 rounded shadow text-xs font-medium text-slate-600 dark:text-slate-300 z-30">
-              {Math.round(mapScale * 100)}%
-            </div>
-
-            {/* My Location Button */}
-            <button className="absolute bottom-4 right-4 bg-white dark:bg-slate-800 p-3 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 active:scale-95 transition-transform z-30">
-              <span className="material-symbols-outlined text-[24px]">my_location</span>
-            </button>
-
-            {/* Selected Station Popup Card */}
-            {selectedStation && (
-              <div className="absolute bottom-20 left-4 right-4 z-40 animate-slide-up">
-                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                  <div className="h-28 w-full bg-cover bg-center relative" style={{ backgroundImage: `url('${selectedStation.image}')` }}>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                    <div className="absolute top-2 right-2">
-                      <span className={`text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide flex items-center gap-1 ${selectedStation.status === 'online' ? 'bg-emerald-500/90' :
-                          selectedStation.status === 'alarm' ? 'bg-amber-500/90' :
+                      {/* 状态标签 */}
+                      <div className="absolute top-4 right-4">
+                        <span className={`backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-lg ${station.status === 'online' ? 'bg-green-500/90' :
+                          station.status === 'alarm' ? 'bg-red-500/90' :
                             'bg-slate-500/90'
-                        }`}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
-                        {selectedStation.status === 'online' ? '在线' : selectedStation.status === 'alarm' ? '告警' : '离线'}
-                      </span>
-                    </div>
-                    <button
-                      className="absolute top-2 left-2 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
-                      onClick={() => setSelectedStationId(null)}
-                    >
-                      <span className="material-symbols-outlined text-[20px]">close</span>
-                    </button>
-                    <div className="absolute bottom-2 left-3 text-white">
-                      <h3 className="text-base font-bold">{selectedStation.name}</h3>
-                    </div>
-                  </div>
-                  <div className="p-3 flex justify-between items-center">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">ID: #SOL-00{selectedStation.id}</span>
-                      <div className="flex items-center gap-1 text-slate-600 dark:text-slate-300 text-xs mt-0.5">
-                        <span className="material-symbols-outlined text-[14px]">location_on</span>
-                        {selectedStation.address}
+                          }`}>
+                          <span className="material-symbols-outlined text-[14px]">
+                            {station.status === 'online' ? 'bolt' : station.status === 'alarm' ? 'warning' : 'cloud_off'}
+                          </span>
+                          {station.status === 'online' ? '运行正常' : station.status === 'alarm' ? '设备告警' : '已离线'}
+                        </span>
+                      </div>
+
+                      {/* 编号 */}
+                      <div className="absolute bottom-4 left-4 text-white">
+                        <div className="text-[10px] opacity-80 font-mono tracking-wider uppercase">
+                          ID: SOL-00{station.id}
+                        </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => navigate(`/station/${selectedStation.id}/overview`)}
-                      className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white hover:bg-primary-dark transition-colors shadow-lg"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-                    </button>
+
+                    {/* 信息区域 */}
+                    <div className="p-5">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">
+                          {station.name}
+                        </h3>
+                        <div className="flex items-center text-slate-500 dark:text-slate-400 text-xs gap-1">
+                          <span className="material-symbols-outlined text-[15px]">location_on</span>
+                          <span>{station.address}</span>
+                        </div>
+                      </div>
+
+                      {/* 数据指标 */}
+                      <div className="grid grid-cols-3 gap-3 p-3.5 bg-white/40 dark:bg-black/20 rounded-2xl border border-white/40 dark:border-white/5">
+                        <div className="flex flex-col gap-0.5">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">光伏功率</div>
+                          <div className="font-bold text-slate-800 dark:text-white text-base">
+                            {station.pvPower.replace(' kWp', '')}
+                            <span className="text-[10px] font-medium text-slate-500 ml-0.5">kW</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-0.5 border-l border-slate-200/50 dark:border-white/10 pl-3">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">储能容量</div>
+                          <div className="font-bold text-slate-800 dark:text-white text-base">
+                            {station.storage.replace(' kWh', '').replace(' MWh', '')}
+                            <span className="text-[10px] font-medium text-slate-500 ml-0.5">
+                              {station.storage.includes('MWh') ? 'MWh' : 'kWh'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-0.5 border-l border-slate-200/50 dark:border-white/10 pl-3">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">充电桩</div>
+                          <div className="font-bold text-slate-800 dark:text-white text-base">
+                            {station.chargers.replace(' 台', '')}
+                            <span className="text-[10px] font-medium text-slate-500 ml-0.5">台</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             )}
+            <div className="h-8"></div>
+          </>
+        ) : (
+          /* Map View */
+          <div className="h-[60vh] rounded-3xl overflow-hidden border border-glass-border-light dark:border-glass-border-dark shadow-lg">
+            <AMapView stations={filteredStations} />
           </div>
         )}
       </main>
+
+      {/* Location Picker Bottom Sheet */}
+      <LocationPicker
+        isOpen={showLocationPicker}
+        onClose={() => setShowLocationPicker(false)}
+        onConfirm={setSelectedLocation}
+        initialLocation={selectedLocation || undefined}
+      />
+
       <BottomNav />
     </div>
   );

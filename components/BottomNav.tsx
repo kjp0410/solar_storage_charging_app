@@ -5,37 +5,34 @@ const BottomNav: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Simple active check
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="shrink-0 bg-white dark:bg-[#101922] border-t border-slate-200 dark:border-slate-800 pt-2 z-50">
-      <div className="flex justify-around items-center h-16 pb-2">
+    <nav className="absolute bottom-0 w-full bg-glass-light/80 dark:bg-glass-dark/80 backdrop-blur-2xl border-t border-glass-border-light dark:border-glass-border-dark z-50 pb-6">
+      <div className="flex justify-around items-center h-14">
         <button
           onClick={() => navigate('/')}
-          className="flex flex-col items-center justify-center w-full h-full gap-1 group"
+          className={`relative flex flex-col items-center justify-center w-full h-full gap-0.5 group ${isActive('/') ? 'text-primary' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'} transition-colors`}
         >
-          <div className={`relative p-1 rounded-full transition-colors ${isActive('/') ? '' : 'group-hover:bg-slate-50 dark:group-hover:bg-slate-800'}`}>
-            <span className={`material-symbols-outlined text-[28px] ${isActive('/') ? 'text-primary filled' : 'text-slate-400 dark:text-slate-500'}`}>
-              home
-            </span>
-          </div>
-          <span className={`text-xs font-medium ${isActive('/') ? 'text-primary' : 'text-slate-400 dark:text-slate-500'}`}>
-            首页
+          {isActive('/') && (
+            <span className="absolute top-0 w-10 h-0.5 bg-primary rounded-b-full"></span>
+          )}
+          <span className={`material-symbols-outlined text-[24px] group-hover:scale-110 transition-transform ${isActive('/') ? 'filled' : ''}`}>
+            home
           </span>
+          <span className={`text-[10px] font-medium ${isActive('/') ? 'font-bold' : ''}`}>首页</span>
         </button>
         <button
           onClick={() => navigate('/me')}
-          className="flex flex-col items-center justify-center w-full h-full gap-1 group"
+          className={`relative flex flex-col items-center justify-center w-full h-full gap-0.5 group ${isActive('/me') ? 'text-primary' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'} transition-colors`}
         >
-          <div className={`relative p-1 rounded-full transition-colors ${isActive('/me') ? '' : 'group-hover:bg-slate-50 dark:group-hover:bg-slate-800'}`}>
-            <span className={`material-symbols-outlined text-[28px] ${isActive('/me') ? 'text-primary filled' : 'text-slate-400 dark:text-slate-500'}`}>
-              person
-            </span>
-          </div>
-          <span className={`text-xs font-medium ${isActive('/me') ? 'text-primary' : 'text-slate-400 dark:text-slate-500'}`}>
-            我的
+          {isActive('/me') && (
+            <span className="absolute top-0 w-10 h-0.5 bg-primary rounded-b-full"></span>
+          )}
+          <span className={`material-symbols-outlined text-[24px] group-hover:scale-110 transition-transform ${isActive('/me') ? 'filled' : ''}`}>
+            person
           </span>
+          <span className={`text-[10px] font-medium ${isActive('/me') ? 'font-bold' : ''}`}>我的</span>
         </button>
       </div>
     </nav>
