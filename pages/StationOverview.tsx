@@ -1,174 +1,312 @@
 import React from 'react';
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import StationLayout from '../components/StationLayout';
-import { powerLoadData } from '../mockData';
+import { stationOverviewData } from '../mockData';
 
 const StationOverview: React.FC = () => {
+  const data = stationOverviewData;
+  const { site_info, realtime_flow } = data;
+
+  // 获取状态颜色
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'normal': case 'generating': case 'running': case 'discharging': case 'exporting':
+        return { bg: 'bg-[#52C41A]', text: 'text-[#52C41A]', bgLight: 'bg-green-50 dark:bg-green-900/20' };
+      case 'standby': case 'idle': case 'charging':
+        return { bg: 'bg-[#BFBFBF]', text: 'text-[#BFBFBF]', bgLight: 'bg-slate-50 dark:bg-slate-800' };
+      case 'fault':
+        return { bg: 'bg-[#FF4D4F]', text: 'text-[#FF4D4F]', bgLight: 'bg-red-50 dark:bg-red-900/20' };
+      case 'warning': case 'importing':
+        return { bg: 'bg-[#FAAD14]', text: 'text-[#FAAD14]', bgLight: 'bg-orange-50 dark:bg-orange-900/20' };
+      default:
+        return { bg: 'bg-slate-400', text: 'text-slate-400', bgLight: 'bg-slate-50' };
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      'normal': '正常', 'generating': '发电中', 'running': '运行中',
+      'discharging': '放电', 'charging': '充电', 'standby': '待机',
+      'fault': '故障', 'warning': '告警', 'importing': '购电',
+      'exporting': '售电', 'idle': '空闲'
+    };
+    return labels[status] || status;
+  };
+
+  const getStrategyLabel = (strategy: string) => {
+    const labels: Record<string, string> = {
+      'peak_shaving': '削峰填谷', 'demand_response': '需求响应', 'backup': '备用电源'
+    };
+    return labels[strategy] || strategy;
+  };
+
+  const getWeatherIcon = (weather: string) => {
+    const icons: Record<string, string> = { 'sunny': 'wb_sunny', 'cloudy': 'cloud', 'rainy': 'rainy' };
+    return icons[weather] || 'wb_sunny';
+  };
+
   return (
     <StationLayout title="站点概览">
-      <div className="flex flex-col gap-6 p-4">
-        {/* Title Section */}
-        <section className="flex flex-col gap-3">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight">A站 - 西翼</h1>
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-[16px]">schedule</span>
-                14:05 | 晴
-              </p>
+      <div className="flex flex-col gap-4 p-4 bg-[#F5F7FA] dark:bg-background-dark min-h-full">
+
+        {/* Header - 站点档案 */}
+        <section className="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-2xl">{getWeatherIcon(site_info.environment.weather)}</span>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">{site_info.name}</h1>
             </div>
-            <div className="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-green-100 dark:bg-green-900/30 pl-3 pr-3 border border-green-200 dark:border-green-800">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              <p className="text-green-700 dark:text-green-400 text-xs font-bold uppercase tracking-wide">正常</p>
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${getStatusColor(site_info.status).bgLight}`}>
+              <span className={`w-2 h-2 rounded-full ${getStatusColor(site_info.status).bg}`}></span>
+              <span className={`text-xs font-bold ${getStatusColor(site_info.status).text}`}>{getStatusLabel(site_info.status)}</span>
+            </div>
+          </div>
+
+          {/* 设计容量 */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs font-medium text-slate-600 dark:text-slate-300">
+              <span className="material-symbols-outlined text-[14px]">solar_power</span>
+              PV: {site_info.design_capacity.pv_kwp}kWp
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs font-medium text-slate-600 dark:text-slate-300">
+              <span className="material-symbols-outlined text-[14px]">battery_horiz_075</span>
+              ESS: {site_info.design_capacity.ess_capacity_kwh}kWh/{site_info.design_capacity.ess_power_kw}kW
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs font-medium text-slate-600 dark:text-slate-300">
+              <span className="material-symbols-outlined text-[14px]">ev_station</span>
+              EVSE: {site_info.design_capacity.charger_count}枪
+            </span>
+          </div>
+
+          {/* 环境数据 */}
+          <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[16px]">thermostat</span>
+              <span>{site_info.environment.temperature}°C</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[16px]">light_mode</span>
+              <span>{site_info.environment.irradiance} W/m²</span>
             </div>
           </div>
         </section>
 
-        {/* Stats Grid */}
+        {/* 能量流拓扑图 */}
+        <section className="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
+          <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">能量流拓扑</h3>
+
+          <div className="relative">
+            {/* 第一行: PV 和 ESS */}
+            <div className="flex justify-between mb-2">
+              {/* PV 节点 */}
+              <div className={`flex-1 flex flex-col items-center p-3 rounded-xl ${getStatusColor(realtime_flow.pv.status).bgLight} border border-slate-200 dark:border-slate-700`}>
+                <span className="material-symbols-outlined text-2xl text-amber-500 mb-1">solar_power</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">光伏 PV</span>
+                <span className="text-lg font-bold text-slate-900 dark:text-white">{realtime_flow.pv.power_kw} kW</span>
+                <span className="text-[10px] text-slate-400">{realtime_flow.pv.daily_energy_kwh} kWh/日</span>
+                <span className={`mt-1 text-[10px] font-bold ${getStatusColor(realtime_flow.pv.status).text}`}>
+                  {getStatusLabel(realtime_flow.pv.status)}
+                </span>
+              </div>
+
+              <div className="w-8"></div>
+
+              {/* ESS 节点 */}
+              <div className={`flex-1 flex flex-col items-center p-3 rounded-xl ${getStatusColor(realtime_flow.ess.status).bgLight} border border-slate-200 dark:border-slate-700`}>
+                <span className="material-symbols-outlined text-2xl text-cyan-500 mb-1">battery_horiz_075</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">储能 ESS</span>
+                <span className="text-lg font-bold text-slate-900 dark:text-white">{realtime_flow.ess.soc}%</span>
+                <span className="text-[10px] text-slate-400">{realtime_flow.ess.power_kw} kW</span>
+                <span className={`mt-1 text-[10px] font-bold ${getStatusColor(realtime_flow.ess.status).text}`}>
+                  {getStatusLabel(realtime_flow.ess.status)}
+                </span>
+              </div>
+            </div>
+
+            {/* 流向箭头行 */}
+            <div className="flex items-center justify-center my-2 gap-2">
+              <div className="flex-1 flex items-center justify-end">
+                <div className="flex items-center gap-1 text-[#52C41A]">
+                  <span className="text-[10px] font-bold">{realtime_flow.pv.power_kw}kW</span>
+                  <span className="material-symbols-outlined text-lg animate-pulse">arrow_downward</span>
+                </div>
+              </div>
+              <div className="w-8"></div>
+              <div className="flex-1 flex items-center justify-start">
+                <div className="flex items-center gap-1 text-[#52C41A]">
+                  <span className="material-symbols-outlined text-lg animate-pulse">arrow_downward</span>
+                  <span className="text-[10px] font-bold">{realtime_flow.ess.power_kw}kW</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 中间: EMS 母线 */}
+            <div className="flex justify-center my-2">
+              <div className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/10 via-primary/20 to-primary/10 rounded-xl border-2 border-primary/30">
+                <span className="material-symbols-outlined text-primary text-xl">hub</span>
+                <span className="text-sm font-bold text-primary">EMS 母线</span>
+                <span className="text-xs text-primary/80">{(realtime_flow.pv.power_kw + realtime_flow.grid.power_kw + realtime_flow.ess.power_kw).toFixed(1)} kW</span>
+              </div>
+            </div>
+
+            {/* 流向箭头行 */}
+            <div className="flex items-center justify-center my-2 gap-2">
+              <div className="flex-1 flex items-center justify-end">
+                <div className="flex items-center gap-1 text-[#FAAD14]">
+                  <span className="material-symbols-outlined text-lg animate-pulse">arrow_upward</span>
+                  <span className="text-[10px] font-bold">{realtime_flow.grid.power_kw}kW</span>
+                </div>
+              </div>
+              <div className="w-8"></div>
+              <div className="flex-1 flex items-center justify-start">
+                <div className="flex items-center gap-1 text-[#52C41A]">
+                  <span className="text-[10px] font-bold">{realtime_flow.ev_charger.power_kw}kW</span>
+                  <span className="material-symbols-outlined text-lg animate-pulse">arrow_downward</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 第三行: Grid 和 EVSE */}
+            <div className="flex justify-between mt-2">
+              {/* Grid 节点 */}
+              <div className={`flex-1 flex flex-col items-center p-3 rounded-xl ${getStatusColor(realtime_flow.grid.status).bgLight} border border-slate-200 dark:border-slate-700`}>
+                <span className="material-symbols-outlined text-2xl text-slate-500 mb-1">electrical_services</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">电网 Grid</span>
+                <span className="text-lg font-bold text-slate-900 dark:text-white">{realtime_flow.grid.power_kw} kW</span>
+                <span className="text-[10px] text-slate-400">购{realtime_flow.grid.daily_import_kwh}/售{realtime_flow.grid.daily_export_kwh}</span>
+                <span className={`mt-1 text-[10px] font-bold ${getStatusColor(realtime_flow.grid.status).text}`}>
+                  {getStatusLabel(realtime_flow.grid.status)}
+                </span>
+              </div>
+
+              <div className="w-8"></div>
+
+              {/* EVSE 节点 */}
+              <div className={`flex-1 flex flex-col items-center p-3 rounded-xl ${getStatusColor(realtime_flow.ev_charger.status).bgLight} border border-slate-200 dark:border-slate-700`}>
+                <span className="material-symbols-outlined text-2xl text-emerald-500 mb-1">ev_station</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">充电 EVSE</span>
+                <span className="text-lg font-bold text-slate-900 dark:text-white">{realtime_flow.ev_charger.power_kw} kW</span>
+                <span className="text-[10px] text-slate-400">{realtime_flow.ev_charger.daily_charged_kwh} kWh/日</span>
+                <span className={`mt-1 text-[10px] font-bold ${getStatusColor(realtime_flow.ev_charger.status).text}`}>
+                  {realtime_flow.ev_charger.active_guns}/{realtime_flow.ev_charger.total_guns}枪
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Bento Grid - 详细指标 */}
         <section className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-3 rounded-xl p-4 bg-white dark:bg-surface-dark shadow-card dark:shadow-none border border-slate-100 dark:border-slate-800 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="material-symbols-outlined text-4xl text-primary">bolt</span>
+          {/* 储能卡片 */}
+          <div className="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="material-symbols-outlined text-cyan-500">battery_horiz_075</span>
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">储能 ESS</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-              <span className="material-symbols-outlined text-[20px]">bolt</span>
-              <p className="text-sm font-medium">当前功率</p>
-            </div>
-            <p className="text-slate-900 dark:text-white text-2xl font-bold tracking-tight">45.2 <span className="text-base font-medium text-slate-400">kW</span></p>
-          </div>
-
-          <div className="flex flex-col gap-3 rounded-xl p-4 bg-white dark:bg-surface-dark shadow-card dark:shadow-none border border-slate-100 dark:border-slate-800 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="material-symbols-outlined text-4xl text-primary">solar_power</span>
-            </div>
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-              <span className="material-symbols-outlined text-[20px]">solar_power</span>
-              <p className="text-sm font-medium">今日发电</p>
-            </div>
-            <p className="text-slate-900 dark:text-white text-2xl font-bold tracking-tight">120.5 <span className="text-base font-medium text-slate-400">kWh</span></p>
-          </div>
-
-          <div className="flex flex-col gap-3 rounded-xl p-4 bg-white dark:bg-surface-dark shadow-card dark:shadow-none border border-slate-100 dark:border-slate-800 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="material-symbols-outlined text-4xl text-primary">battery_charging_full</span>
-            </div>
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-              <span className="material-symbols-outlined text-[20px]">battery_charging_full</span>
-              <p className="text-sm font-medium">电池 SOC</p>
-            </div>
-            <div className="flex items-end justify-between">
-              <p className="text-slate-900 dark:text-white text-2xl font-bold tracking-tight">82<span className="text-base font-medium text-slate-400">%</span></p>
-              <div className="h-2 w-12 bg-slate-100 dark:bg-slate-700 rounded-full mb-2 overflow-hidden">
-                <div className="h-full bg-primary w-[82%] rounded-full"></div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">SOC</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.ess.soc}%</span>
+              </div>
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-cyan-500 rounded-full transition-all" style={{ width: `${realtime_flow.ess.soc}%` }}></div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">SOH</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.ess.soh}%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">温度</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.ess.temp_min}~{realtime_flow.ess.temp_max}°C</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">策略</span>
+                <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">{getStrategyLabel(realtime_flow.ess.strategy)}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 rounded-xl p-4 bg-white dark:bg-surface-dark shadow-card dark:shadow-none border border-slate-100 dark:border-slate-800 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="material-symbols-outlined text-4xl text-primary">ev_station</span>
+          {/* 光伏卡片 */}
+          <div className="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="material-symbols-outlined text-amber-500">solar_power</span>
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">光伏 PV</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-              <span className="material-symbols-outlined text-[20px]">ev_station</span>
-              <p className="text-sm font-medium">充电量</p>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">PR值</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.pv.pr_value}%</span>
+              </div>
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${realtime_flow.pv.pr_value}%` }}></div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">逆变器</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.pv.inverter_online}/{realtime_flow.pv.inverter_total}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">今日发电</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.pv.daily_energy_kwh} kWh</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">状态</span>
+                <span className={`text-xs font-bold ${getStatusColor(realtime_flow.pv.status).text}`}>{getStatusLabel(realtime_flow.pv.status)}</span>
+              </div>
             </div>
-            <p className="text-slate-900 dark:text-white text-2xl font-bold tracking-tight">310 <span className="text-base font-medium text-slate-400">kWh</span></p>
           </div>
-        </section>
 
-        {/* Device Status */}
-        <section>
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 px-1">设备状态</h3>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}>
-            <div className="w-[160px] shrink-0 flex flex-col p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-slate-800 shadow-card">
-              <div className="flex items-center justify-between mb-2">
-                <span className="material-symbols-outlined text-slate-400">solar_power</span>
-                <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">光伏</p>
-              <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-lg font-bold text-slate-900 dark:text-white">12</span>
-                <span className="text-xs text-slate-400">/ 12</span>
-              </div>
+          {/* 充电卡片 */}
+          <div className="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="material-symbols-outlined text-emerald-500">ev_station</span>
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">充电 EVSE</span>
             </div>
-            <div className="w-[160px] shrink-0 flex flex-col p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-slate-800 shadow-card">
-              <div className="flex items-center justify-between mb-2">
-                <span className="material-symbols-outlined text-slate-400">battery_horiz_075</span>
-                <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">在充枪数</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.ev_charger.active_guns}/{realtime_flow.ev_charger.total_guns}</span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">储能</p>
-              <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-lg font-bold text-slate-900 dark:text-white">2</span>
-                <span className="text-xs text-slate-400">/ 2</span>
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${(realtime_flow.ev_charger.active_guns / realtime_flow.ev_charger.total_guns) * 100}%` }}></div>
               </div>
-            </div>
-            <div className="w-[160px] shrink-0 flex flex-col p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-slate-800 shadow-card">
-              <div className="flex items-center justify-between mb-2">
-                <span className="material-symbols-outlined text-slate-400">ev_station</span>
-                <span className="flex h-2 w-2 rounded-full bg-amber-500"></span>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">今日订单</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.ev_charger.daily_orders}单</span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase">充电桩</p>
-              <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-lg font-bold text-slate-900 dark:text-white">8</span>
-                <span className="text-xs text-slate-400">/ 9</span>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">今日充电</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.ev_charger.daily_charged_kwh} kWh</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">当前功率</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.ev_charger.power_kw} kW</span>
               </div>
             </div>
           </div>
-        </section>
 
-        {/* Chart Section */}
-        <section className="bg-white dark:bg-surface-dark rounded-xl p-5 border border-slate-100 dark:border-slate-800 shadow-card">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">功率与负荷曲线</h3>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-primary"></div>
-                <span className="text-xs text-slate-500">发电</span>
+          {/* 电网卡片 */}
+          <div className="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="material-symbols-outlined text-slate-500">electrical_services</span>
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">电网 Grid</span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">今日购电</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.grid.daily_import_kwh} kWh</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></div>
-                <span className="text-xs text-slate-500">负荷</span>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">今日售电</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.grid.daily_export_kwh} kWh</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">当前功率</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{realtime_flow.grid.power_kw} kW</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">状态</span>
+                <span className={`text-xs font-bold ${getStatusColor(realtime_flow.grid.status).text}`}>{getStatusLabel(realtime_flow.grid.status)}</span>
               </div>
             </div>
-          </div>
-          <div className="w-full h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={powerLoadData}>
-                <defs>
-                  <linearGradient id="colorGeneration" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0f7ae6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#0f7ae6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
-                <XAxis
-                  dataKey="time"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
-                  dy={10}
-                />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="generation"
-                  stroke="#0f7ae6"
-                  fillOpacity={1}
-                  fill="url(#colorGeneration)"
-                  strokeWidth={2}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="load"
-                  stroke="#cbd5e1"
-                  fill="transparent"
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
           </div>
         </section>
       </div>

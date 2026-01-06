@@ -209,3 +209,61 @@ export const financialAnalysisData = {
   ],
 };
 
+// 站点概览仪表盘数据
+export const stationOverviewData = {
+  site_info: {
+    name: "A站-西翼",
+    status: "normal" as const, // normal | warning | fault
+    design_capacity: {
+      pv_kwp: 150,
+      ess_capacity_kwh: 200,
+      ess_power_kw: 100,
+      charger_count: 10
+    },
+    environment: {
+      weather: "sunny" as const, // sunny | cloudy | rainy
+      irradiance: 850,  // W/m²
+      temperature: 28   // °C
+    }
+  },
+  realtime_flow: {
+    pv: {
+      power_kw: 45.2,
+      daily_energy_kwh: 120.5,
+      status: "generating" as const,  // generating | standby | fault
+      pr_value: 85.2,        // Performance Ratio %
+      inverter_online: 3,
+      inverter_total: 3
+    },
+    grid: {
+      power_kw: 15.5,
+      daily_import_kwh: 50.0,
+      daily_export_kwh: 12.0,
+      status: "importing" as const    // importing | exporting | idle
+    },
+    ess: {
+      power_kw: 20.0,
+      soc: 82,
+      soh: 98,
+      status: "discharging" as const, // charging | discharging | standby
+      temp_max: 32,
+      temp_min: 28,
+      strategy: "peak_shaving" as const // peak_shaving | demand_response | backup
+    },
+    ev_charger: {
+      power_kw: 80.7,
+      daily_charged_kwh: 310.0,
+      active_guns: 6,
+      total_guns: 10,
+      daily_orders: 42,
+      status: "running" as const      // running | standby | fault
+    }
+  },
+  // 能量流向定义
+  energy_flows: [
+    { from: "pv", to: "ems", power_kw: 45.2, active: true },
+    { from: "grid", to: "ems", power_kw: 15.5, active: true },
+    { from: "ems", to: "ev_charger", power_kw: 80.7, active: true },
+    { from: "ess", to: "ems", power_kw: 20.0, active: true }
+  ]
+};
