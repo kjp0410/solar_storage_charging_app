@@ -158,3 +158,54 @@ export const chargerUtilizationData = [
   { day: '周六', value: 72 },
   { day: '周日', value: 75 },
 ];
+
+// 财务分析完整数据
+export const financialAnalysisData = {
+  // 核心收益 Header
+  header: {
+    totalRevenue: 124592.45,        // 本年累计总收益
+    monthOverMonth: 12.5,           // 环比增长率 %
+    co2Reduction: 86.5,             // 累计减排CO₂ (吨)
+  },
+
+  // 关键指标 Bento Grid (2x2)
+  keyMetrics: {
+    roi: 18.4,                      // 投资回报率 %
+    staticPayback: 6.8,             // 静态回收期 (年)
+    pvSelfUseRate: 82,              // 光伏自用率 %
+    avgChargerUtilization: 68,      // 平均充电利用率 %
+    batteryCycles: 235,             // 储能循环次数
+  },
+
+  // 节省成本明细
+  costSavings: {
+    peakValleyArbitrage: 28500,     // 峰谷套利收益
+    pvSelfUseSavings: 12800,        // 光伏自用节省
+    demandChargeSavings: 3900,      // 需量电费节省
+    total: 45200,                   // 总节省
+  },
+
+  // 月度财务数据 (用于组合图)
+  monthlyData: [
+    { month: '1月', income: 8000, expense: 6000, cumulativeProfit: 2000 },
+    { month: '2月', income: 11000, expense: 7000, cumulativeProfit: 6000 },
+    { month: '3月', income: 13000, expense: 6500, cumulativeProfit: 12500 },
+    { month: '4月', income: 10000, expense: 8000, cumulativeProfit: 14500 },
+    { month: '5月', income: 14000, expense: 9000, cumulativeProfit: 19500 },
+    { month: '6月', income: 16000, expense: 9500, cumulativeProfit: 26000 },
+    { month: '7月', income: 15500, expense: 8500, cumulativeProfit: 33000 },
+    { month: '8月', income: 17000, expense: 9000, cumulativeProfit: 41000 },
+    { month: '9月', income: 14500, expense: 8000, cumulativeProfit: 47500 },
+    { month: '10月', income: 13000, expense: 7500, cumulativeProfit: 53000 },
+    { month: '11月', income: 12000, expense: 7000, cumulativeProfit: 58000 },
+    { month: '12月', income: 18000, expense: 10000, cumulativeProfit: 66000 },
+  ],
+
+  // 年度财务数据 (用于年度视图)
+  yearlyData: [
+    { year: '2022', income: 98000, expense: 72000, cumulativeProfit: 26000 },
+    { year: '2023', income: 115000, expense: 78000, cumulativeProfit: 63000 },
+    { year: '2024', income: 124592, expense: 82000, cumulativeProfit: 105592 },
+  ],
+};
+

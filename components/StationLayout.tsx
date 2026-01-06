@@ -36,9 +36,7 @@ const StationLayout: React.FC<StationLayoutProps> = ({ title, children }) => {
                             站点 A - 光伏电站 04
                         </span>
                     </div>
-                    <button className="flex items-center justify-center size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300">
-                        <span className="material-symbols-outlined">settings</span>
-                    </button>
+                    <div className="size-10"></div>
                 </div>
             </header>
 
