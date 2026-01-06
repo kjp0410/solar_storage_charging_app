@@ -10,12 +10,27 @@ const Me: React.FC = () => {
     const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false);
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
 
     // Notification settings state
     const [notifyAlarm, setNotifyAlarm] = useState(true);
     const [notifyMaintenance, setNotifyMaintenance] = useState(true);
     const [notifySystem, setNotifySystem] = useState(false);
     const [notifyEmail, setNotifyEmail] = useState(false);
+
+    // Toast helper
+    const showToast = (message: string, type: 'success' | 'info' = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 2000);
+    };
+
+    // Logout handler
+    const handleLogout = () => {
+        setShowLogoutConfirm(false);
+        showToast('已退出登录', 'info');
+        setTimeout(() => navigate('/'), 500);
+    };
 
     return (
         <div className="relative flex flex-col h-full bg-background-light dark:bg-background-dark text-slate-900 dark:text-white overflow-hidden">
@@ -145,7 +160,7 @@ const Me: React.FC = () => {
 
                         {/* Footer Actions */}
                         <div className="flex flex-col items-center gap-4 mt-2 mb-6">
-                            <button className="w-full bg-glass-light dark:bg-glass-dark backdrop-blur-xl border border-red-200/50 dark:border-red-900/50 text-red-600 font-bold py-3.5 rounded-2xl shadow-glass hover:bg-red-50/50 dark:hover:bg-red-900/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                            <button onClick={() => setShowLogoutConfirm(true)} className="w-full bg-glass-light dark:bg-glass-dark backdrop-blur-xl border border-red-200/50 dark:border-red-900/50 text-red-600 font-bold py-3.5 rounded-2xl shadow-glass hover:bg-red-50/50 dark:hover:bg-red-900/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
                                 <span className="material-symbols-outlined">logout</span>
                                 退出登录
                             </button>
@@ -180,7 +195,7 @@ const Me: React.FC = () => {
                                     className="bg-center bg-no-repeat bg-cover rounded-full h-24 w-24 shadow-lg ring-4 ring-white/80 dark:ring-white/20"
                                     style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAklQc8CdzvghVAAELukFSU0oMNAYiV28V45zHN2oAM3SQtnHZq0_gozxWEBp3PK-FSfTvmVtefU6zzE4Pa4gIUKD7iEIIa-NN2UxHep1Tp_FE6WF-8BIIiTF04tKe9WPpDbYxBV99Umq6rYmXySaUipXM045B4_YPdFahsn66zjYv_vVMbfORgGUj0Ui1_6p42lAALb71f3mqr1Ezjofza2MUPITSf5PstRfKsHv0D3gC4U7LQvkYBU4UQ6JBRPABtQLn_IdDcy3M")' }}
                                 ></div>
-                                <button className="mt-2 text-sm text-primary font-medium">更换头像</button>
+                                <button onClick={() => showToast('头像更换功能开发中', 'info')} className="mt-2 text-sm text-primary font-medium">更换头像</button>
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">姓名</label>
@@ -200,7 +215,7 @@ const Me: React.FC = () => {
                             </div>
                         </div>
                         <div className="p-4 border-t border-white/20 dark:border-white/10 bg-white/30 dark:bg-black/20">
-                            <button onClick={() => setShowProfileModal(false)} className="w-full py-3 px-4 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors">
+                            <button onClick={() => { showToast('个人资料已保存'); setShowProfileModal(false); }} className="w-full py-3 px-4 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors">
                                 保存修改
                             </button>
                         </div>
@@ -386,7 +401,7 @@ const Me: React.FC = () => {
                             </button>
                         </div>
                         <div className="overflow-y-auto no-scrollbar p-4 space-y-3">
-                            <button className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-colors">
+                            <button onClick={() => showToast('用户手册加载中...', 'info')} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-colors">
                                 <span className="material-symbols-outlined text-primary">menu_book</span>
                                 <div className="flex-1 text-left">
                                     <p className="font-medium text-slate-900 dark:text-white">用户手册</p>
@@ -394,7 +409,7 @@ const Me: React.FC = () => {
                                 </div>
                                 <span className="material-symbols-outlined text-slate-400">chevron_right</span>
                             </button>
-                            <button className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-colors">
+                            <button onClick={() => showToast('FAQ 页面加载中...', 'info')} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-colors">
                                 <span className="material-symbols-outlined text-primary">quiz</span>
                                 <div className="flex-1 text-left">
                                     <p className="font-medium text-slate-900 dark:text-white">常见问题</p>
@@ -402,7 +417,7 @@ const Me: React.FC = () => {
                                 </div>
                                 <span className="material-symbols-outlined text-slate-400">chevron_right</span>
                             </button>
-                            <button className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-colors">
+                            <button onClick={() => showToast('视频教程加载中...', 'info')} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-colors">
                                 <span className="material-symbols-outlined text-primary">play_circle</span>
                                 <div className="flex-1 text-left">
                                     <p className="font-medium text-slate-900 dark:text-white">视频教程</p>
@@ -410,7 +425,7 @@ const Me: React.FC = () => {
                                 </div>
                                 <span className="material-symbols-outlined text-slate-400">chevron_right</span>
                             </button>
-                            <button className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-colors">
+                            <button onClick={() => showToast('客服热线: 400-888-8888', 'info')} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-colors">
                                 <span className="material-symbols-outlined text-primary">support_agent</span>
                                 <div className="flex-1 text-left">
                                     <p className="font-medium text-slate-900 dark:text-white">联系客服</p>
@@ -461,10 +476,52 @@ const Me: React.FC = () => {
                             </div>
                         </div>
                         <div className="p-4 border-t border-white/20 dark:border-white/10 bg-white/30 dark:bg-black/20">
-                            <button onClick={() => setShowFeedbackModal(false)} className="w-full py-3 px-4 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors">
+                            <button onClick={() => { showToast('反馈已提交，感谢您的建议！'); setShowFeedbackModal(false); }} className="w-full py-3 px-4 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors">
                                 提交反馈
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Logout Confirmation Modal */}
+            {showLogoutConfirm && (
+                <div className="absolute inset-0 z-[110] flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowLogoutConfirm(false)}></div>
+                    <div className="relative w-[280px] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+                        <div className="p-5 text-center">
+                            <div className="w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-3">
+                                <span className="material-symbols-outlined text-red-500 text-3xl">logout</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">确认退出</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">确定要退出当前账号吗？</p>
+                        </div>
+                        <div className="flex border-t border-slate-200 dark:border-slate-700">
+                            <button
+                                onClick={() => setShowLogoutConfirm(false)}
+                                className="flex-1 py-3 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-r border-slate-200 dark:border-slate-700"
+                            >
+                                取消
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="flex-1 py-3 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                            >
+                                退出
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Toast Notification */}
+            {toast && (
+                <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[120] animate-fade-in">
+                    <div className={`flex items-center gap-2 px-4 py-2.5 rounded-full shadow-xl ${toast.type === 'success' ? 'bg-emerald-500' : 'bg-slate-800'} text-white`}>
+                        <span className="material-symbols-outlined text-lg">
+                            {toast.type === 'success' ? 'check_circle' : 'info'}
+                        </span>
+                        <span className="text-sm font-medium">{toast.message}</span>
                     </div>
                 </div>
             )}

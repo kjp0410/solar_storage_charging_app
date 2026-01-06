@@ -214,7 +214,7 @@ const Home: React.FC = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
 
                       {/* 状态标签 */}
-                      <div className="absolute top-4 right-4">
+                      <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
                         <span className={`backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-lg ${station.status === 'online' ? 'bg-green-500/90' :
                           station.status === 'alarm' ? 'bg-red-500/90' :
                             'bg-slate-500/90'
@@ -223,6 +223,14 @@ const Home: React.FC = () => {
                             {station.status === 'online' ? 'bolt' : station.status === 'alarm' ? 'warning' : 'cloud_off'}
                           </span>
                           {station.status === 'online' ? '运行正常' : station.status === 'alarm' ? '设备告警' : '已离线'}
+                        </span>
+                        {/* 站点类型标签 */}
+                        <span className={`backdrop-blur-md text-white px-2.5 py-0.5 rounded-full text-[10px] font-medium shadow-lg ${station.config.hasPV && station.config.hasESS && station.config.hasEVSE ? 'bg-emerald-500/90' :
+                            station.config.hasPV && station.config.hasESS ? 'bg-cyan-500/90' :
+                              'bg-amber-500/90'
+                          }`}>
+                          {station.config.hasPV && station.config.hasESS && station.config.hasEVSE ? '光储充' :
+                            station.config.hasPV && station.config.hasESS ? '光储' : '光伏'}
                         </span>
                       </div>
 

@@ -1,3 +1,10 @@
+// 站点配置类型
+export interface StationConfig {
+  hasPV: boolean;
+  hasESS: boolean;
+  hasEVSE: boolean;
+}
+
 export interface Station {
   id: string;
   name: string;
@@ -8,6 +15,9 @@ export interface Station {
   chargers: string;
   image: string;
   coordinates: { x: number; y: number }; // For mock map
+  lat?: number;  // 纬度
+  lng?: number;  // 经度
+  config: StationConfig;
 }
 
 export interface Alarm {

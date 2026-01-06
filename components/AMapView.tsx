@@ -25,14 +25,6 @@ const AMapView: React.FC<AMapViewProps> = ({ stations, onStationSelect }) => {
     const [selectedStation, setSelectedStation] = useState<Station | null>(null);
     const navigate = useNavigate();
 
-    // 站点Mock GCJ02坐标（实际生产中应从mockData中获取WGS84坐标后转换）
-    const stationCoords: Record<string, [number, number]> = {
-        '1': [121.4737, 31.2304], // 上海
-        '2': [120.1551, 30.2741], // 杭州
-        '3': [118.7969, 32.0603], // 南京
-        '4': [113.2644, 23.1291], // 广州
-    };
-
     useEffect(() => {
         if (!mapContainer.current || !window.AMap) {
             console.warn('AMap not loaded');
@@ -91,9 +83,12 @@ const AMapView: React.FC<AMapViewProps> = ({ stations, onStationSelect }) => {
       `;
         };
 
-        // 创建标记点数据
+        // 创建标记点数据 - 使用站点的实际经纬度
         const markers = stations.map((station) => {
-            const coord = stationCoords[station.id] || [121.4737, 31.2304];
+            // 使用站点数据中的lat/lng，如果没有则使用默认值
+            const coord: [number, number] = station.lat && station.lng
+                ? [station.lng, station.lat]
+                : [121.4737, 31.2304];
             return {
                 lnglat: coord,
                 station: station,
@@ -158,7 +153,9 @@ const AMapView: React.FC<AMapViewProps> = ({ stations, onStationSelect }) => {
         } else {
             // 如果聚合插件未加载，使用普通Marker
             stations.forEach((station) => {
-                const coord = stationCoords[station.id] || [121.4737, 31.2304];
+                const coord: [number, number] = station.lat && station.lng
+                    ? [station.lng, station.lat]
+                    : [121.4737, 31.2304];
                 const marker = new window.AMap.Marker({
                     position: coord,
                     content: createMarkerContent(station),
@@ -233,10 +230,10 @@ const AMapView: React.FC<AMapViewProps> = ({ stations, onStationSelect }) => {
                             <div className="absolute top-2 right-2">
                                 <span
                                     className={`text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide flex items-center gap-1 ${selectedStation.status === 'online'
-                                            ? 'bg-emerald-500/90'
-                                            : selectedStation.status === 'alarm'
-                                                ? 'bg-amber-500/90'
-                                                : 'bg-slate-500/90'
+                                        ? 'bg-emerald-500/90'
+                                        : selectedStation.status === 'alarm'
+                                            ? 'bg-amber-500/90'
+                                            : 'bg-slate-500/90'
                                         }`}
                                 >
                                     <span className="w-1.5 h-1.5 rounded-full bg-white" />

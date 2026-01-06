@@ -1,14 +1,17 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip, AreaChart, Area, LineChart, Line, YAxis, CartesianGrid, ComposedChart } from 'recharts';
 import StationLayout from '../components/StationLayout';
 import { pvRealtimeData, batteryCycleData, chargerUtilizationData, financialAnalysisData, deviceAnalysisData } from '../mockData';
-
-
+import { useStationConfig } from '../hooks/useStationConfig';
 
 const StationAnalysis: React.FC = () => {
+    const { id: stationId = '1' } = useParams<{ id: string }>();
+    const { config, availableTabs } = useStationConfig(stationId);
+
     const [activeTab, setActiveTab] = useState<'device' | 'financial'>('device');
     const [chartView, setChartView] = useState<'monthly' | 'yearly'>('monthly');
-    const [deviceTab, setDeviceTab] = useState<'battery' | 'inverter' | 'charger'>('battery');
+    const [deviceTab, setDeviceTab] = useState<'pv' | 'battery' | 'charger'>('pv');
     const [longPressProgress, setLongPressProgress] = useState<{ [key: string]: number }>({});
     const [gunFilter, setGunFilter] = useState<'all' | 'Charging' | 'Idle' | 'Fault' | 'Offline'>('all');
     const [selectedGun, setSelectedGun] = useState<typeof deviceAnalysisData.charger.guns[0] | null>(null);
@@ -17,6 +20,13 @@ const StationAnalysis: React.FC = () => {
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
     const finData = financialAnalysisData;
     const deviceData = deviceAnalysisData;
+
+    // 初始化默认选中第一个可用的Tab
+    useEffect(() => {
+        if (availableTabs.length > 0 && !availableTabs.find(t => t.key === deviceTab)) {
+            setDeviceTab(availableTabs[0].key);
+        }
+    }, [availableTabs, deviceTab]);
 
     // Long press handlers
     const handleLongPressStart = useCallback((action: string) => {
@@ -273,29 +283,18 @@ const StationAnalysis: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Device Subsystem Tabs */}
+                        {/* Device Subsystem Tabs - 动态渲染 */}
                         <div className="flex w-full gap-1 p-1 bg-glass-light dark:bg-glass-dark backdrop-blur-xl rounded-xl border border-glass-border-light dark:border-glass-border-dark">
-                            <button
-                                onClick={() => setDeviceTab('battery')}
-                                className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${deviceTab === 'battery' ? 'bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
-                            >
-                                <span className="material-symbols-outlined text-[16px]">battery_horiz_075</span>
-                                电池
-                            </button>
-                            <button
-                                onClick={() => setDeviceTab('inverter')}
-                                className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${deviceTab === 'inverter' ? 'bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
-                            >
-                                <span className="material-symbols-outlined text-[16px]">electric_bolt</span>
-                                逆变器
-                            </button>
-                            <button
-                                onClick={() => setDeviceTab('charger')}
-                                className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${deviceTab === 'charger' ? 'bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
-                            >
-                                <span className="material-symbols-outlined text-[16px]">ev_station</span>
-                                充电桩
-                            </button>
+                            {availableTabs.map(tab => (
+                                <button
+                                    key={tab.key}
+                                    onClick={() => setDeviceTab(tab.key)}
+                                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${deviceTab === tab.key ? 'bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+                                >
+                                    <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
+                                    {tab.label}
+                                </button>
+                            ))}
                         </div>
 
                         {/* Tab Content */}
@@ -428,9 +427,65 @@ const StationAnalysis: React.FC = () => {
                             </div>
                         )}
 
-                        {deviceTab === 'inverter' && (
+                        {deviceTab === 'pv' && (
                             <div className="flex flex-col gap-4">
-                                {/* DC/AC Dual Column */}
+                                {/* 光伏系统概览 */}
+                                <div className="flex flex-col p-5 bg-glass-light dark:bg-glass-dark backdrop-blur-xl rounded-3xl border border-glass-border-light dark:border-glass-border-dark shadow-glass">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <span className="material-symbols-outlined text-amber-500">solar_power</span>
+                                        <h3 className="text-slate-900 dark:text-white font-bold text-base">光伏系统概览</h3>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div className="text-center p-3 bg-white/50 dark:bg-white/5 rounded-xl">
+                                            <p className="text-[10px] text-slate-400 mb-1">总装机</p>
+                                            <p className="text-lg font-bold text-slate-900 dark:text-white">{deviceData.inverter.dc.power * 2}<span className="text-xs text-slate-400 ml-0.5">kWp</span></p>
+                                        </div>
+                                        <div className="text-center p-3 bg-white/50 dark:bg-white/5 rounded-xl">
+                                            <p className="text-[10px] text-slate-400 mb-1">当前功率</p>
+                                            <p className="text-lg font-bold text-primary">{deviceData.inverter.dc.power}<span className="text-xs text-slate-400 ml-0.5">kW</span></p>
+                                        </div>
+                                        <div className="text-center p-3 bg-white/50 dark:bg-white/5 rounded-xl">
+                                            <p className="text-[10px] text-slate-400 mb-1">PR值</p>
+                                            <p className="text-lg font-bold text-emerald-500">85.2<span className="text-xs text-slate-400 ml-0.5">%</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 逆变器列表 */}
+                                <div className="flex flex-col p-5 bg-glass-light dark:bg-glass-dark backdrop-blur-xl rounded-3xl border border-glass-border-light dark:border-glass-border-dark shadow-glass">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-primary">electric_bolt</span>
+                                            <h3 className="text-slate-900 dark:text-white font-bold text-base">逆变器列表</h3>
+                                        </div>
+                                        <span className="text-xs text-slate-400 bg-white/50 dark:bg-white/10 px-2 py-0.5 rounded">在线 {deviceData.inverter.onlineCount || 5}/{deviceData.inverter.totalCount || 5}</span>
+                                    </div>
+
+                                    {/* 逆变器卡片列表 */}
+                                    <div className="flex flex-col gap-2">
+                                        {[1, 2, 3, 4, 5].map((invId) => (
+                                            <div key={invId} className="flex items-center justify-between p-3 bg-white/50 dark:bg-white/5 rounded-xl">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${invId <= (deviceData.inverter.onlineCount || 5) ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                                                        <span className={`material-symbols-outlined text-lg ${invId <= (deviceData.inverter.onlineCount || 5) ? 'text-emerald-500' : 'text-slate-400'}`}>electric_bolt</span>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium text-slate-900 dark:text-white">逆变器 #{invId}</p>
+                                                        <p className={`text-[10px] ${invId <= (deviceData.inverter.onlineCount || 5) ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                                            {invId <= (deviceData.inverter.onlineCount || 5) ? '运行中' : '离线'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-sm font-bold text-slate-900 dark:text-white">{invId <= (deviceData.inverter.onlineCount || 5) ? (deviceData.inverter.dc.power / 5).toFixed(1) : '--'} kW</p>
+                                                    <p className="text-[10px] text-slate-400">IGBT {invId <= (deviceData.inverter.onlineCount || 5) ? `${deviceData.inverter.igbtTemp - invId + 3}°C` : '--'}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* DC/AC 参数 */}
                                 <div className="grid grid-cols-2 gap-3">
                                     {/* DC Side */}
                                     <div className="flex flex-col p-4 bg-glass-light dark:bg-glass-dark backdrop-blur-xl rounded-2xl border border-glass-border-light dark:border-glass-border-dark shadow-glass">
@@ -474,33 +529,6 @@ const StationAnalysis: React.FC = () => {
                                                 <span className="text-xs font-bold text-emerald-500">{deviceData.inverter.ac.powerFactor}</span>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                {/* IGBT Temperature Gauge */}
-                                <div className="flex flex-col p-5 bg-glass-light dark:bg-glass-dark backdrop-blur-xl rounded-3xl border border-glass-border-light dark:border-glass-border-dark shadow-glass">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-red-500">device_thermostat</span>
-                                            <h3 className="text-slate-900 dark:text-white font-bold text-base">IGBT 模块温度</h3>
-                                        </div>
-                                        <span className={`text-2xl font-bold ${deviceData.inverter.igbtTemp > 80 ? 'text-red-500' : deviceData.inverter.igbtTemp > 60 ? 'text-orange-500' : 'text-emerald-500'}`}>
-                                            {deviceData.inverter.igbtTemp}°C
-                                        </span>
-                                    </div>
-
-                                    {/* Temp Bar */}
-                                    <div className="relative h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                        <div
-                                            className={`absolute inset-y-0 left-0 rounded-full transition-all ${deviceData.inverter.igbtTemp > 80 ? 'bg-gradient-to-r from-red-400 to-red-500' : deviceData.inverter.igbtTemp > 60 ? 'bg-gradient-to-r from-orange-400 to-orange-500' : 'bg-gradient-to-r from-emerald-400 to-emerald-500'}`}
-                                            style={{ width: `${(deviceData.inverter.igbtTemp / 100) * 100}%` }}
-                                        ></div>
-                                    </div>
-                                    <div className="flex justify-between mt-2">
-                                        <span className="text-[10px] text-slate-400">0°C</span>
-                                        <span className="text-[10px] text-orange-400">60°C</span>
-                                        <span className="text-[10px] text-red-400">80°C</span>
-                                        <span className="text-[10px] text-slate-400">100°C</span>
                                     </div>
                                 </div>
                             </div>

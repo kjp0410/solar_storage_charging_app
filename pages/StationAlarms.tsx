@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import StationLayout from '../components/StationLayout';
 import { alarms } from '../mockData';
 import { Alarm } from '../types';
@@ -8,14 +9,35 @@ type StatusFilter = 'all' | 'pending' | 'processing' | 'resolved';
 type TimeFilter = '24h' | '7d' | '30d' | 'all';
 
 const StationAlarms: React.FC = () => {
+  const location = useLocation();
   const [selectedAlarm, setSelectedAlarm] = useState<Alarm | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [levelFilter, setLevelFilter] = useState<LevelFilter>('all');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all'); // Changed to 'all' so incoming alarm is visible
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('24h');
   const [showLevelDropdown, setShowLevelDropdown] = useState(false);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  // Handle incoming alarm selection from Home page
+  useEffect(() => {
+    const state = location.state as { selectedAlarmId?: string } | null;
+    if (state?.selectedAlarmId) {
+      const alarm = alarms.find(a => a.id === state.selectedAlarmId);
+      if (alarm) {
+        setSelectedAlarm(alarm);
+        // Clear the state so refreshing doesn't reopen
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state]);
+
+  // Toast helper
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 2000);
+  };
 
   const levelOptions = [
     { value: 'all', label: '全部' },
@@ -274,10 +296,10 @@ const StationAlarms: React.FC = () => {
                 </div>
               </div>
               <div className="p-4 border-t border-white/20 dark:border-white/10 bg-white/30 dark:bg-black/20 flex gap-3">
-                <button onClick={() => setSelectedAlarm(null)} className="flex-1 py-3 px-4 rounded-2xl border border-slate-300/50 dark:border-slate-600/50 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
+                <button onClick={() => { showToast('告警已关闭'); setSelectedAlarm(null); }} className="flex-1 py-3 px-4 rounded-2xl border border-slate-300/50 dark:border-slate-600/50 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
                   关闭告警
                 </button>
-                <button className="flex-1 py-3 px-4 rounded-2xl bg-primary text-white font-semibold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors">
+                <button onClick={() => { showToast('告警已确认'); setSelectedAlarm(null); }} className="flex-1 py-3 px-4 rounded-2xl bg-primary text-white font-semibold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors">
                   确认
                 </button>
               </div>
@@ -326,7 +348,7 @@ const StationAlarms: React.FC = () => {
                 <button onClick={() => setShowCreateModal(false)} className="flex-1 py-3 px-4 rounded-2xl border border-slate-300/50 dark:border-slate-600/50 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
                   取消
                 </button>
-                <button onClick={() => setShowCreateModal(false)} className="flex-1 py-3 px-4 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors">
+                <button onClick={() => { showToast('工单已提交'); setShowCreateModal(false); }} className="flex-1 py-3 px-4 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors">
                   提交工单
                 </button>
               </div>
@@ -334,6 +356,16 @@ const StationAlarms: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[100] animate-fade-in">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-full shadow-xl bg-emerald-500 text-white">
+            <span className="material-symbols-outlined text-lg">check_circle</span>
+            <span className="text-sm font-medium">{toast}</span>
+          </div>
+        </div>
+      )}
     </StationLayout>
   );
 };

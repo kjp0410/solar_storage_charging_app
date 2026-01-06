@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { alarms } from '../mockData';
 
 interface NotificationBellProps {
     onOpenNotifications?: () => void;
+    stationId?: string;
 }
 
-const NotificationBell: React.FC<NotificationBellProps> = ({ onOpenNotifications }) => {
+const NotificationBell: React.FC<NotificationBellProps> = ({ onOpenNotifications, stationId = '1' }) => {
+    const navigate = useNavigate();
     const [showPanel, setShowPanel] = useState(false);
 
     const unreadCount = alarms.filter(a => a.status !== 'resolved').length;
@@ -13,6 +16,17 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onOpenNotifications
     const handleClick = () => {
         setShowPanel(!showPanel);
         onOpenNotifications?.();
+    };
+
+    const handleAlarmClick = (alarmId: string) => {
+        setShowPanel(false);
+        // Navigate to alarms page with selected alarm ID in state
+        navigate(`/station/${stationId}/alarms`, { state: { selectedAlarmId: alarmId } });
+    };
+
+    const handleViewAll = () => {
+        setShowPanel(false);
+        navigate(`/station/${stationId}/alarms`);
     };
 
     const getLevelColor = (level: string) => {
@@ -71,7 +85,8 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onOpenNotifications
                             {alarms.filter(a => a.status !== 'resolved').slice(0, 5).map((alarm) => (
                                 <div
                                     key={alarm.id}
-                                    className={`px-5 py-4 border-b border-white/10 dark:border-white/5 cursor-pointer hover:bg-white/30 dark:hover:bg-white/5 transition-colors ${getLevelBg(alarm.level)}`}
+                                    onClick={() => handleAlarmClick(alarm.id)}
+                                    className={`px-5 py-4 border-b border-white/10 dark:border-white/5 cursor-pointer hover:bg-white/30 dark:hover:bg-white/5 transition-colors active:scale-[0.98] ${getLevelBg(alarm.level)}`}
                                 >
                                     <div className="flex items-start gap-3">
                                         <div className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${getLevelColor(alarm.level)} shadow-lg`} />
@@ -86,6 +101,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onOpenNotifications
                                                 {alarm.time}
                                             </p>
                                         </div>
+                                        <span className="material-symbols-outlined text-slate-400 text-[16px]">chevron_right</span>
                                     </div>
                                 </div>
                             ))}
@@ -93,7 +109,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onOpenNotifications
 
                         {/* Footer */}
                         <div className="px-5 py-3 border-t border-white/20 dark:border-white/10 bg-white/30 dark:bg-black/20">
-                            <button className="w-full text-center text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
+                            <button onClick={handleViewAll} className="w-full text-center text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
                                 查看全部告警 →
                             </button>
                         </div>

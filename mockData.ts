@@ -3,47 +3,87 @@ import { Station, Alarm } from './types';
 export const stations: Station[] = [
   {
     id: '1',
-    name: '光伏电站 Alpha-01',
-    address: '纽约工业园 123号',
+    name: '上海张江光储充示范站',
+    address: '上海市浦东新区张江高科技园区祖冲之路2288号',
     status: 'online',
-    pvPower: '450 kWp',
-    storage: '800 kWh',
-    chargers: '4 台',
+    pvPower: '500 kWp',
+    storage: '1000 kWh',
+    chargers: '10 台',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAB5BWZ_qpD1TKlcG0A0QRlyLiqyCbiVUWn_N2C_J-m3vYbkxdR-YPhJ7_sqFsdOpuvsI9NtUvIJlZoFBQtdbWLAdqYmbvxBfqXNjnX5_Fg-PFjS6RA4Yr860sVls-CKgPvMEvfHdOBir1SoPg6v0IxZo8UyUOv2Rfp4asm7bxHWa_FuHD4KAHFGoJ8pVH5iEkQGWIshWDs1rIHjy3DaSSS-x-cm_Nc6EBeFPOk1dQfGeMPhZuO45euJON8eD77_HrTf5XOgrekUpo',
-    coordinates: { x: 50, y: 40 }
+    coordinates: { x: 85, y: 45 },
+    lat: 31.2304,
+    lng: 121.4737,
+    config: { hasPV: true, hasESS: true, hasEVSE: true }
   },
   {
     id: '2',
-    name: '储能中心 Beta',
-    address: '加州电网路 456号',
-    status: 'alarm',
-    pvPower: '120 kWp',
-    storage: '2.5 MWh',
-    chargers: '2 台',
+    name: '北京望京光储电站',
+    address: '北京市朝阳区望京科技园利泽西街7号',
+    status: 'online',
+    pvPower: '300 kWp',
+    storage: '600 kWh',
+    chargers: '--',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAq_BaIFYhj3lv1S8eHqcQmgNWWHlAaYoE0kHgfw6u0TLIkplSCiL-u1o0X3Rnz1oAsGEFtQJEYzHSK1zuWDNVuQuEz85xmx41uszuPeegY-qOHKpygZydnZ8bPWkIB51JRSMK_P3gECUzDqsOvbxQei0Al9bFMSEeLdNdHAqhFXqbxpzPVawvQD6-2-xtmQ12DEbJthHZyL7elgxSE4BIMzFzcZg8K1x4uI4eioJv_eHgvwQce4Lz6SeGeB1f1k_mFtN3Hl4ff6VA',
-    coordinates: { x: 20, y: 65 }
+    coordinates: { x: 70, y: 20 },
+    lat: 39.9847,
+    lng: 116.4761,
+    config: { hasPV: true, hasESS: true, hasEVSE: false }
   },
   {
     id: '3',
-    name: '充电站 Delta',
-    address: '德州高速路 789号',
-    status: 'offline',
-    pvPower: '50 kWp',
-    storage: '100 kWh',
-    chargers: '16 台',
+    name: '深圳南山光伏电站',
+    address: '深圳市南山区科技园南区高新南一道008号',
+    status: 'alarm',
+    pvPower: '800 kWp',
+    storage: '--',
+    chargers: '--',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD8Q2eYLbGTacZNg1x6baroasf0CooMFb7cnfXkGHh9jkndF5kkLpCjbCwuA0GxPo4fIK_h8NFn6xTwsYee3tGuXYJH8vbDCuyrQXVVR5R8kQMgs8NIPA1rf7t0GwmLVfc_QRCmXNS5OXxMVbQjy8crCO2kam0F5-Ts5HjtrpEKwHHjPChRNXGwkLGEBvKU_1bbbPkpK8ocTYVAqyQ78NIU9zU6jUs_IJQ0ODK6NE3uxI4o92dWMTWWNa1daugwQ0Y4yv_rEP16z1Y',
-    coordinates: { x: 80, y: 20 }
+    coordinates: { x: 75, y: 85 },
+    lat: 22.5431,
+    lng: 114.0579,
+    config: { hasPV: true, hasESS: false, hasEVSE: false }
   },
   {
     id: '4',
-    name: '风电场 X-Ray',
-    address: '科罗拉多州风岭 101号',
+    name: '杭州西湖光储充站',
+    address: '杭州市西湖区文三路90号',
     status: 'online',
-    pvPower: '1.2 MWp',
-    storage: '3.0 MWh',
-    chargers: '--',
+    pvPower: '200 kWp',
+    storage: '500 kWh',
+    chargers: '8 台',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDvO9d9ISIl4EIP8UxNIFyjxPBZykbqDN-rOzsQlSU7DUu4ZVLhryhGnqetsYlk-xDOdwdB5V6rFmHZHBJr7Oxui-6ms2ogdu1PXLRFAq3dhHegPPP00itJS2MY6ORCyx304hX8tXYQBjnXPoDWCLFNTqchInoSCjXKsPR_Ue1yx7jQkfXLgcE6XcMkL9Fx9fwxA6cI1Lo08LE4bLdEWY9W8H2WgJ4xqITVcWh-mmwQiYobpbVGwWW0a1qPJypf6VBwNFNzmwDnzLw',
-    coordinates: { x: 60, y: 80 }
+    coordinates: { x: 80, y: 55 },
+    lat: 30.2741,
+    lng: 120.1551,
+    config: { hasPV: true, hasESS: true, hasEVSE: true }
+  },
+  {
+    id: '5',
+    name: '成都高新光储站',
+    address: '成都市高新区天府大道北段1700号',
+    status: 'online',
+    pvPower: '150 kWp',
+    storage: '300 kWh',
+    chargers: '--',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAB5BWZ_qpD1TKlcG0A0QRlyLiqyCbiVUWn_N2C_J-m3vYbkxdR-YPhJ7_sqFsdOpuvsI9NtUvIJlZoFBQtdbWLAdqYmbvxBfqXNjnX5_Fg-PFjS6RA4Yr860sVls-CKgPvMEvfHdOBir1SoPg6v0IxZo8UyUOv2Rfp4asm7bxHWa_FuHD4KAHFGoJ8pVH5iEkQGWIshWDs1rIHjy3DaSSS-x-cm_Nc6EBeFPOk1dQfGeMPhZuO45euJON8eD77_HrTf5XOgrekUpo',
+    coordinates: { x: 35, y: 55 },
+    lat: 30.5728,
+    lng: 104.0668,
+    config: { hasPV: true, hasESS: true, hasEVSE: false }
+  },
+  {
+    id: '6',
+    name: '广州天河光伏站',
+    address: '广州市天河区珠江新城华夏路30号',
+    status: 'offline',
+    pvPower: '600 kWp',
+    storage: '--',
+    chargers: '--',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAq_BaIFYhj3lv1S8eHqcQmgNWWHlAaYoE0kHgfw6u0TLIkplSCiL-u1o0X3Rnz1oAsGEFtQJEYzHSK1zuWDNVuQuEz85xmx41uszuPeegY-qOHKpygZydnZ8bPWkIB51JRSMK_P3gECUzDqsOvbxQei0Al9bFMSEeLdNdHAqhFXqbxpzPVawvQD6-2-xtmQ12DEbJthHZyL7elgxSE4BIMzFzcZg8K1x4uI4eioJv_eHgvwQce4Lz6SeGeB1f1k_mFtN3Hl4ff6VA',
+    coordinates: { x: 70, y: 80 },
+    lat: 23.1291,
+    lng: 113.2644,
+    config: { hasPV: true, hasESS: false, hasEVSE: false }
   }
 ];
 
@@ -209,63 +249,78 @@ export const financialAnalysisData = {
   ],
 };
 
-// 站点概览仪表盘数据
-export const stationOverviewData = {
+// 站点概览数据类型接口
+interface StationOverviewDataType {
   site_info: {
-    name: "A站-西翼",
-    status: "normal" as const, // normal | warning | fault
-    design_capacity: {
-      pv_kwp: 150,
-      ess_capacity_kwh: 200,
-      ess_power_kw: 100,
-      charger_count: 10
-    },
-    environment: {
-      weather: "sunny" as const, // sunny | cloudy | rainy
-      irradiance: 850,  // W/m²
-      temperature: 28   // °C
-    }
+    name: string;
+    status: 'normal' | 'warning' | 'fault';
+    design_capacity: { pv_kwp: number; ess_capacity_kwh: number; ess_power_kw: number; charger_count: number };
+    environment: { weather: 'sunny' | 'cloudy' | 'rainy'; irradiance: number; temperature: number };
+  };
+  realtime_flow: {
+    pv: { power_kw: number; daily_energy_kwh: number; status: 'generating' | 'standby' | 'fault'; pr_value: number; inverter_online: number; inverter_total: number };
+    grid: { power_kw: number; daily_import_kwh: number; daily_export_kwh: number; status: 'exporting' | 'importing' | 'idle' };
+    ess: { power_kw: number; soc: number; soh: number; status: 'charging' | 'discharging' | 'standby'; temp_max: number; temp_min: number; strategy: 'peak_shaving' | 'demand_response' | 'backup' };
+    ev_charger: { power_kw: number; daily_charged_kwh: number; active_guns: number; total_guns: number; daily_orders: number; status: 'running' | 'standby' | 'fault' };
+  };
+  energy_flows: Array<{ from: string; to: string; power_kw: number; active: boolean }>;
+}
+
+// 站点概览数据（站点1作为默认）
+export const stationOverviewData: StationOverviewDataType = {
+  site_info: {
+    name: "上海张江光储充示范站",
+    status: "normal",
+    design_capacity: { pv_kwp: 500, ess_capacity_kwh: 1000, ess_power_kw: 200, charger_count: 10 },
+    environment: { weather: "sunny", irradiance: 920, temperature: 26 }
   },
   realtime_flow: {
-    pv: {
-      power_kw: 45.2,
-      daily_energy_kwh: 120.5,
-      status: "generating" as const,  // generating | standby | fault
-      pr_value: 85.2,        // Performance Ratio %
-      inverter_online: 3,
-      inverter_total: 3
-    },
-    grid: {
-      power_kw: 15.5,
-      daily_import_kwh: 50.0,
-      daily_export_kwh: 12.0,
-      status: "importing" as const    // importing | exporting | idle
-    },
-    ess: {
-      power_kw: 20.0,
-      soc: 82,
-      soh: 98,
-      status: "discharging" as const, // charging | discharging | standby
-      temp_max: 32,
-      temp_min: 28,
-      strategy: "peak_shaving" as const // peak_shaving | demand_response | backup
-    },
-    ev_charger: {
-      power_kw: 80.7,
-      daily_charged_kwh: 310.0,
-      active_guns: 6,
-      total_guns: 10,
-      daily_orders: 42,
-      status: "running" as const      // running | standby | fault
-    }
+    pv: { power_kw: 385.2, daily_energy_kwh: 1520.5, status: "generating", pr_value: 92.3, inverter_online: 5, inverter_total: 5 },
+    grid: { power_kw: 45.8, daily_import_kwh: 20.0, daily_export_kwh: 185.0, status: "exporting" },
+    ess: { power_kw: 85.0, soc: 72, soh: 98, status: "charging", temp_max: 32, temp_min: 28, strategy: "peak_shaving" },
+    ev_charger: { power_kw: 254.4, daily_charged_kwh: 680.0, active_guns: 7, total_guns: 10, daily_orders: 45, status: "running" }
   },
-  // 能量流向定义
   energy_flows: [
-    { from: "pv", to: "ems", power_kw: 45.2, active: true },
-    { from: "grid", to: "ems", power_kw: 15.5, active: true },
-    { from: "ems", to: "ev_charger", power_kw: 80.7, active: true },
-    { from: "ess", to: "ems", power_kw: 20.0, active: true }
+    { from: "pv", to: "ems", power_kw: 385.2, active: true },
+    { from: "ems", to: "grid", power_kw: 45.8, active: true },
+    { from: "ems", to: "ess", power_kw: 85.0, active: true },
+    { from: "ems", to: "ev_charger", power_kw: 254.4, active: true }
   ]
+};
+
+// 每个站点的概览数据
+const stationOverviewDataMap: Record<string, StationOverviewDataType> = {
+  '1': stationOverviewData,
+  '2': {
+    site_info: { name: "北京望京光储电站", status: "normal" as const, design_capacity: { pv_kwp: 300, ess_capacity_kwh: 600, ess_power_kw: 100, charger_count: 0 }, environment: { weather: "cloudy" as const, irradiance: 650, temperature: 18 } },
+    realtime_flow: { pv: { power_kw: 168.5, daily_energy_kwh: 720.3, status: "generating" as const, pr_value: 88.6, inverter_online: 3, inverter_total: 3 }, grid: { power_kw: 32.5, daily_import_kwh: 45.0, daily_export_kwh: 120.0, status: "exporting" as const }, ess: { power_kw: 136.0, soc: 45, soh: 97, status: "discharging" as const, temp_max: 28, temp_min: 24, strategy: "peak_shaving" as const }, ev_charger: { power_kw: 0, daily_charged_kwh: 0, active_guns: 0, total_guns: 0, daily_orders: 0, status: "standby" as const } },
+    energy_flows: [{ from: "pv", to: "ems", power_kw: 168.5, active: true }, { from: "ess", to: "ems", power_kw: 136.0, active: true }, { from: "ems", to: "grid", power_kw: 32.5, active: true }]
+  },
+  '3': {
+    site_info: { name: "深圳南山光伏电站", status: "warning" as const, design_capacity: { pv_kwp: 800, ess_capacity_kwh: 0, ess_power_kw: 0, charger_count: 0 }, environment: { weather: "sunny" as const, irradiance: 980, temperature: 32 } },
+    realtime_flow: { pv: { power_kw: 625.8, daily_energy_kwh: 2850.0, status: "generating" as const, pr_value: 85.2, inverter_online: 7, inverter_total: 8 }, grid: { power_kw: 625.8, daily_import_kwh: 0, daily_export_kwh: 2850.0, status: "exporting" as const }, ess: { power_kw: 0, soc: 0, soh: 0, status: "standby" as const, temp_max: 0, temp_min: 0, strategy: "peak_shaving" as const }, ev_charger: { power_kw: 0, daily_charged_kwh: 0, active_guns: 0, total_guns: 0, daily_orders: 0, status: "standby" as const } },
+    energy_flows: [{ from: "pv", to: "ems", power_kw: 625.8, active: true }, { from: "ems", to: "grid", power_kw: 625.8, active: true }]
+  },
+  '4': {
+    site_info: { name: "杭州西湖光储充站", status: "normal" as const, design_capacity: { pv_kwp: 200, ess_capacity_kwh: 500, ess_power_kw: 100, charger_count: 8 }, environment: { weather: "cloudy" as const, irradiance: 580, temperature: 22 } },
+    realtime_flow: { pv: { power_kw: 95.2, daily_energy_kwh: 420.5, status: "generating" as const, pr_value: 90.1, inverter_online: 2, inverter_total: 2 }, grid: { power_kw: 15.8, daily_import_kwh: 85.0, daily_export_kwh: 25.0, status: "importing" as const }, ess: { power_kw: 45.0, soc: 82, soh: 99, status: "discharging" as const, temp_max: 30, temp_min: 26, strategy: "demand_response" as const }, ev_charger: { power_kw: 156.0, daily_charged_kwh: 380.0, active_guns: 5, total_guns: 8, daily_orders: 32, status: "running" as const } },
+    energy_flows: [{ from: "pv", to: "ems", power_kw: 95.2, active: true }, { from: "ess", to: "ems", power_kw: 45.0, active: true }, { from: "grid", to: "ems", power_kw: 15.8, active: true }, { from: "ems", to: "ev_charger", power_kw: 156.0, active: true }]
+  },
+  '5': {
+    site_info: { name: "成都高新光储站", status: "normal" as const, design_capacity: { pv_kwp: 150, ess_capacity_kwh: 300, ess_power_kw: 60, charger_count: 0 }, environment: { weather: "rainy" as const, irradiance: 320, temperature: 20 } },
+    realtime_flow: { pv: { power_kw: 35.8, daily_energy_kwh: 180.0, status: "generating" as const, pr_value: 75.2, inverter_online: 2, inverter_total: 2 }, grid: { power_kw: 24.2, daily_import_kwh: 120.0, daily_export_kwh: 15.0, status: "importing" as const }, ess: { power_kw: 60.0, soc: 35, soh: 96, status: "discharging" as const, temp_max: 26, temp_min: 22, strategy: "backup" as const }, ev_charger: { power_kw: 0, daily_charged_kwh: 0, active_guns: 0, total_guns: 0, daily_orders: 0, status: "standby" as const } },
+    energy_flows: [{ from: "pv", to: "ems", power_kw: 35.8, active: true }, { from: "ess", to: "ems", power_kw: 60.0, active: true }, { from: "grid", to: "ems", power_kw: 24.2, active: true }]
+  },
+  '6': {
+    site_info: { name: "广州天河光伏站", status: "fault" as const, design_capacity: { pv_kwp: 600, ess_capacity_kwh: 0, ess_power_kw: 0, charger_count: 0 }, environment: { weather: "sunny" as const, irradiance: 890, temperature: 30 } },
+    realtime_flow: { pv: { power_kw: 0, daily_energy_kwh: 850.0, status: "fault" as const, pr_value: 0, inverter_online: 0, inverter_total: 6 }, grid: { power_kw: 0, daily_import_kwh: 0, daily_export_kwh: 850.0, status: "idle" as const }, ess: { power_kw: 0, soc: 0, soh: 0, status: "standby" as const, temp_max: 0, temp_min: 0, strategy: "peak_shaving" as const }, ev_charger: { power_kw: 0, daily_charged_kwh: 0, active_guns: 0, total_guns: 0, daily_orders: 0, status: "standby" as const } },
+    energy_flows: []
+  }
+};
+
+// 根据站点ID获取站点概览数据
+export const getStationOverviewData = (stationId: string) => {
+  return stationOverviewDataMap[stationId] || stationOverviewData;
 };
 
 // 设备深度分析数据 (Device Deep Dive Diagnostic)
@@ -327,7 +382,9 @@ export const deviceAnalysisData = {
       frequency: 50.02, // Hz
       powerFactor: 0.99
     },
-    igbtTemp: 68.5 // °C
+    igbtTemp: 68.5, // °C
+    onlineCount: 5,
+    totalCount: 5
   },
   charger: {
     guns: [

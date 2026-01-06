@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { stations } from '../mockData';
 
 interface StationLayoutProps {
     title: string;
@@ -10,6 +11,10 @@ const StationLayout: React.FC<StationLayoutProps> = ({ title, children }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { id } = useParams();
+
+    // 获取当前站点信息
+    const station = stations.find(s => s.id === id);
+    const stationName = station?.name || `站点 ${id}`;
 
     const tabs = [
         { label: '概览', path: `/station/${id}/overview`, icon: 'grid_view' },
@@ -37,8 +42,8 @@ const StationLayout: React.FC<StationLayoutProps> = ({ title, children }) => {
                         <h1 className="text-base font-bold tracking-tight text-slate-900 dark:text-white leading-none">
                             {title}
                         </h1>
-                        <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                            站点 A - 光伏电站 04
+                        <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 max-w-[200px] truncate">
+                            {stationName}
                         </span>
                     </div>
                     <div className="size-10"></div>
